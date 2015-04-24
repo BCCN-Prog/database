@@ -78,7 +78,7 @@ def load_current_data():
     ftp.quit()
     
     recent_data=rename_columns(recent_data)
-    recent_data=recent_data.sort(['Station ID', 'ID'])
+    recent_data=recent_data.sort(['Station ID', 'Date'])
 
     return recent_data
     
