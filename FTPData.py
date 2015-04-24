@@ -2,12 +2,12 @@
 
 from ftplib import FTP
 import zipfile
-import StringIO
+import io
 import pandas as pd
 
 def temporary_load_one_dataset():
 
-    fh =  StringIO.StringIO()
+    fh =  io.BytesIO()
     ftp = FTP('ftp-cdc.dwd.de')
     ftp.login()
     ftp.retrbinary('RETR %s' % '/pub/CDC/observations_germany/climate/daily/kl/recent/tageswerte_KL_00044_akt.zip', fh.write)
@@ -61,11 +61,11 @@ def get_historical_data():
     for zipstring in listfiles:
         
         counter+=1
-        print 'working on station number', counter, '/',N,'...'
+        print('working on station number', counter, '/',N,'...')
         
         if zipstring.endswith('.zip'):
     
-            fh =  StringIO.StringIO()
+            fh =  io.BytesIO()
             ftp.retrbinary('RETR %s' % zipstring, fh.write)
             fh.seek(0) # rewind pseudo-file
             

@@ -84,17 +84,29 @@ def get_historical_data():
             txtfile = myzip.open(txtfilename)
             
             current_dataframe=pd.read_csv(txtfile, sep=';')    
-            current_dataframe=current_dataframe.drop('eor',1)        
+            current_dataframe=current_dataframe.drop('eor',1)
+            
+            date_name = list(current_dataframe)[1]
+            current_dataframe = current_dataframe.dropna(subset = [date_name])
     
             if df_empty:
                 historical_data = current_dataframe
                 df_empty = False
-            else:
-                historical_data.append(current_dataframe)
+                column_names = list(current_dataframe)
                 
-            del fh, myzip, list_in_zip, txtfile
+            else:
+                historical_data = historical_data.append(current_dataframe)
+                
+                current_column_names = list(current_dataframe)
+                if current_column_names != column_names:
+                    print(zipfile, 'has different column names!')
+                
+            del fh, myzip, list_in_zip, txtfile, current_dataframe
 
     ftp.quit()
+    
+    historical_data=rename_columns(historical_data)
+    historical_data=historical_data.sort(['Station ID', 'ID'])
 
     return historical_data
     
