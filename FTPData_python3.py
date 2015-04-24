@@ -92,17 +92,15 @@ def get_historical_data():
             if df_empty:
                 historical_data = current_dataframe
                 df_empty = False
-                column_names = list(current_dataframe)
                 
             else:
                 historical_data = historical_data.append(current_dataframe)
                 
-                current_column_names = list(current_dataframe)
-                if current_column_names != column_names:
-                    print(zipfile, 'has different column names!')
+
                 
             del fh, myzip, list_in_zip, txtfile, current_dataframe
-
+            if counter > 2.0:
+                break
     ftp.quit()
     
     historical_data=rename_columns(historical_data)
