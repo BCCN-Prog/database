@@ -106,7 +106,7 @@ def get_historical_data():
     ftp.quit()
     
     historical_data=rename_columns(historical_data)
-    historical_data=historical_data.sort(['Station ID', 'ID'])
+    historical_data=historical_data.sort(['Station ID', 'Date'])
 
     return historical_data
     
