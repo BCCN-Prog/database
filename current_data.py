@@ -9,14 +9,17 @@ from ftplib import FTP
 import zipfile
 import io
 import pandas as pd
-from FTPData_python3 import rename_columns 
+from FTPData import rename_columns 
+
+CORRUPT_STATIONS = ['02494_akt.zip','02532_akt.zip','04878_akt.zip']    
+#These are the corrupt stations of the RECENT database. They have no 
+#information (dead stations) and they break the format of the database.
 
 
-def load_current_data():
-    
+def load_current_data(): 
     '''
-    DOCUMENTATION
-    '''
+    Load the whole
+    '''    
 
   
     df_empty = True
@@ -27,9 +30,17 @@ def load_current_data():
     listfiles = ftp.nlst(path_recent_data)  
     
     counter = 0    
-    N = len(listfiles)    
+    N = len(listfiles)        
     
     for zipstring in listfiles:
+        corrupted = False
+        for corrupt_station in CORRUPT_STATIONS:
+            if zipstring.endswith(corrupt_station):
+                corrupted = True
+                break
+        
+        if corrupted:
+            continue
         
         counter+=1
         print('working on station number', counter, '/',N,'...')
@@ -56,29 +67,54 @@ def load_current_data():
             
             recent_dataframe=pd.read_csv(txtfile, sep=';')    
             recent_dataframe=recent_dataframe.drop('eor',1)  
-            
-            date_name = list(recent_dataframe)[1]
-            recent_dataframe = recent_dataframe.dropna(subset = [date_name])
-            
+            recent_dataframe=recent_dataframe.dropna(axis = 0)
+            recent_dataframe.iloc[:,0] = int(recent_dataframe.iloc[0,0])
+
             #Creating a new dataframe just once at the beginning
             if df_empty:
                 recent_data = recent_dataframe
                 df_empty = False
-                column_names = list(recent_dataframe)
+                column_names = recent_dataframe.columns
+                up_col_names = [str(item).strip().upper() for item in column_names]
                 
+                df_empty = False
             else:
+ 
+                current_column_names = recent_dataframe.columns
+                
+                if (current_column_names != column_names).any() :
+                    
+                    print('Renaming column!')
+                    
+                    up_current_col_names = [str(item).strip().upper() for item \
+                                            in current_column_names]
+                    
+                    if (up_col_names != up_current_col_names):
+                        print('WARNING: different column names!!!')
+                    
+                    column_mapping = dict([(current_column_names[i],column_names[i]) \
+                                            for i in range(len(column_names))])
+                    recent_dataframe = recent_dataframe.rename(columns = column_mapping)
+
+                
+            
                 recent_data = recent_data.append(recent_dataframe)
                 
-                recent_column_names = list(recent_dataframe)
-                if recent_column_names != column_names:
-                    print(zipfile, 'has different column names!')
-                
-            del fh, myzip, list_in_zip, txtfile, recent_dataframe
 
+
+            
+            del fh, myzip, list_in_zip, txtfile, recent_dataframe
+            
     ftp.quit()
     
     recent_data=rename_columns(recent_data)
     recent_data=recent_data.sort(['Station ID', 'Date'])
+    recent_data = recent_data.replace(to_replace = -999, value = float('nan'))
+    recent_data['Date'] = recent_data['Date'].astype(int).astype(str)
+    recent_data['Year'] = [date[0:4] for date in recent_data['Date']]
+    recent_data['Month'] = [date[4:6] for date in recent_data['Date']]
+    recent_data['Day'] = [date[6:8] for date in recent_data['Date']]
+
 
     return recent_data
     
