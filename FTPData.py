@@ -5,6 +5,8 @@ import zipfile
 import io
 import pandas as pd
 
+
+
 def temporary_load_one_dataset():
 
     fh =  io.BytesIO()
@@ -39,8 +41,6 @@ def temporary_load_one_dataset():
     
 
 
-
-
 def get_historical_data():
     
     '''
@@ -54,16 +54,20 @@ def get_historical_data():
     ftp = FTP('ftp-cdc.dwd.de')
     ftp.login()
     listfiles = ftp.nlst(path_hist_data)  
+
     
     counter = 0    
     N = len(listfiles)    
-    
+
+
     for zipstring in listfiles:
-        
-        counter+=1
-        print('working on station number', counter, '/',N,'...')
+
         
         if zipstring.endswith('.zip'):
+
+
+            counter+=1
+            print('working on station number', counter, '/',N,'...')
     
             fh =  io.BytesIO()
             ftp.retrbinary('RETR %s' % zipstring, fh.write)
@@ -96,10 +100,15 @@ def get_historical_data():
 
     ftp.quit()
 
+    historical_data = rename_columns(historical_data)
+    historical_data = historical_data.sort(['Station ID', 'Date'])
+
     return historical_data
     
     
-    
+
+
+
 def rename_columns(data_ger):
     column_names = data_ger.columns.values
     data_eng = data_ger.rename(columns = {column_names[0]: 'Station ID', 
@@ -122,3 +131,7 @@ def rename_columns(data_ger):
     })
     return data_eng
 
+
+    if __name__ in '__main__':
+
+        hist_dat = get_historical_data()
