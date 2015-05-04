@@ -89,19 +89,47 @@ def get_historical_data():
             
             current_dataframe=pd.read_csv(txtfile, sep=';')    
             current_dataframe=current_dataframe.drop('eor',1)        
-    
+            current_dataframe=current_dataframe.dropna(axis = 0)
+            current_dataframe.iloc[:,0] = int(current_dataframe.iloc[0,0])
+            
             if df_empty:
                 historical_data = current_dataframe
+                
+                column_names = current_dataframe.columns
+                up_col_names = [str(item).strip().upper() for item in column_names]
+                
                 df_empty = False
             else:
-                historical_data.append(current_dataframe)
+                
+                current_column_names = current_dataframe.columns
+                
+                if (current_column_names != column_names).any() :
+                    
+                    print('Renaming column!')
+                    
+                    up_current_col_names = [str(item).strip().upper() for item \
+                                            in current_column_names]
+                    
+                    if (up_col_names != up_current_col_names):
+                        print('WARNING: different column names!!!')
+                    
+                    column_mapping = dict([(current_column_names[i],column_names[i]) \
+                                            for i in range(len(column_names))])
+                    current_dataframe = current_dataframe.rename(columns = column_mapping)
+                    
+                
+                historical_data = historical_data.append(current_dataframe)
+                
+                
                 
             del fh, myzip, list_in_zip, txtfile
 
     ftp.quit()
-
+    
     historical_data = rename_columns(historical_data)
     historical_data = historical_data.sort(['Station ID', 'Date'])
+    historical_data = historical_data.replace(to_replace = -999, value = float('nan'))
+    historical_data['Date'] = historical_data['Date'].astype(int).astype(str)
 
     return historical_data
     
@@ -132,6 +160,6 @@ def rename_columns(data_ger):
     return data_eng
 
 
-    if __name__ in '__main__':
+if __name__ in '__main__':
 
-        hist_dat = get_historical_data()
+    hist_dat = get_historical_data()
