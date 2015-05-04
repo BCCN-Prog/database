@@ -55,12 +55,12 @@ def get_historical_data():
     ftp.login()
     listfiles = ftp.nlst(path_hist_data)  
 
-    
+
     counter = 0    
     N = len(listfiles)    
 
 
-    for zipstring in listfiles:
+    for zipstring in listfiles[:3]:
 
         
         if zipstring.endswith('.zip'):
@@ -100,7 +100,7 @@ def get_historical_data():
                 
                 df_empty = False
             else:
-                
+ 
                 current_column_names = current_dataframe.columns
                 
                 if (current_column_names != column_names).any() :
@@ -121,7 +121,6 @@ def get_historical_data():
                 historical_data = historical_data.append(current_dataframe)
                 
                 
-                
             del fh, myzip, list_in_zip, txtfile
 
     ftp.quit()
@@ -130,6 +129,7 @@ def get_historical_data():
     historical_data = historical_data.sort(['Station ID', 'Date'])
     historical_data = historical_data.replace(to_replace = -999, value = float('nan'))
     historical_data['Date'] = historical_data['Date'].astype(int).astype(str)
+
 
     return historical_data
     
