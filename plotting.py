@@ -3,11 +3,12 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import operator
 
 
 #creating test time series
-#rng = pd.date_range('1/1/2011', periods=5000, freq='D')
-#ts = pd.Series(np.random.randn(np.size(rng)), index=rng)
+rng = pd.date_range('1/1/2011', periods=5000, freq='D')
+ts = pd.Series(np.random.randn(np.size(rng)), index=rng)
 
 def load_data(path):
     '''
@@ -32,7 +33,7 @@ def load_data(path):
     
     return data
 
-def get_data(data, station_id, category = 3):
+def get_data(data, station_id, category = 3, start=None, end=None):
     """
     (pandas.Dataframe, int, list) -> (pandas.DataFrame)
     Returns desired information from the database about requested city and categories.
@@ -63,22 +64,39 @@ def get_data(data, station_id, category = 3):
     
     rlv_station = data[data.iloc[:, 1] == station_id]
     selected = rlv_station.iloc[:, category]
-    
-    return selected
-    
-def calculating_means(time_series): #for now: mean for each month in different years
-    #returns dataframe with years-columns, months-rows, elements - mean values for months
-    
+    selected.index = pd.DatetimeIndex(selected.index) 
+                
+    return selected[start:end]
+ 
+def calculating_means(time_series,resolution='month'): 
+    #creates a DataFrame out of time series, indices-resolution, columns - years
     years = range(time_series.index.year[0], time_series.index.year[-1]) #period 
-    yearly_month_stats = [time_series.xs(str(year)).groupby(lambda x : x.month).mean() for year in years]
-    df2 = pd.concat(yearly_month_stats, axis=1, keys = years)
+    yearly_resolution_stats = [time_series.xs(str(year)).groupby(lambda x : operator.attrgetter(resolution)(x)).mean() for year in years]    
+    df2 = pd.concat(yearly_resolution_stats, axis=1, keys = years)
     
-    return df2
+    return df2    
 
-def plot_one_month_means(time_series, month_number=3): 
-    #takes timeseries as an imput, makes month-years dataframe, plots one row of it
+def finding_max(data_frame):#we pass to this function DataFrame either after preprocessing
+                           
+    return data_frame.max(),data_frame.idxmax()
     
-    months_years_means=calculating_means(time_series)
+def finding_min(data_frame):#same as finding_max
+
+    return data_frame.min(),data_frame.idxmin()
+                                                #data_frame.values.min() returns nan
+    
+def get_statistics(time_series,resolution='month',function=finding_min,average=True):
+    #function to find max/min averages/in total
+    transformed_frame=calculating_means(time_series,resolution)   
+    if average:
+        transformed_frame=transformed_frame.mean(axis=1) 
+    return function(transformed_frame) 
+    #doesn-t work when not averaging
+
+def plot_one_month_means(time_series, resolution='month', month_number=11):     
+    #takes timeseries as an imput, makes month-years dataframe, plots one row of it
+    #now only works with mobths
+    months_years_means=calculating_means(time_series,resolution)
     ToPlot=months_years_means.iloc[month_number,:] # to acess one row
     
     #plotting
@@ -93,9 +111,27 @@ Data=load_data('db.txt')
 timeSeries=get_data(Data,1)
 timeSeries=pd.TimeSeries(timeSeries)
 plot_one_month_means(timeSeries)
+print(get_statistics(timeSeries,resolution='month',function=finding_min,average=True))
 
-#Error
-#years = range(time_series.index.year[0], time_series.index.year[-1]) #period 
-#AttributeError: 'Index' object has no attribute 'year'
+#For now:
+
+#Problem! whene averaging we obtain Series, max,idxmax work
+#Without we have DataFrame, max,idmax doesn-t work
+
+#average=False returns 
+#1937    17.693548
+#1938    16.806452
+#1939    17.393548 ...
+
+#1938     8
+#1939     8
+#1940     7
+
+#average=True returns right thing
+
+#dayofyear attribute returns 1...365? not day-month
+
+#Plotting
+#we can only plot months, also want years and days
 
 ##different kinds of plots...
