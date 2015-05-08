@@ -60,7 +60,7 @@ def get_historical_data():
     N = len(listfiles)    
 
 
-    for zipstring in listfiles[:3]:
+    for zipstring in listfiles[:500]:
 
         
         if zipstring.endswith('.zip'):
@@ -129,6 +129,9 @@ def get_historical_data():
     historical_data = historical_data.sort(['Station ID', 'Date'])
     historical_data = historical_data.replace(to_replace = -999, value = float('nan'))
     historical_data['Date'] = historical_data['Date'].astype(int).astype(str)
+    historical_data['Year'] = [date[0:4] for date in historical_data['Date']]
+    historical_data['Month'] = [date[4:6] for date in historical_data['Date']]
+    historical_data['Day'] = [date[6:8] for date in historical_data['Date']]
 
 
     return historical_data
