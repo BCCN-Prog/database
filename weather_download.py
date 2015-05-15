@@ -7,7 +7,7 @@ from ftplib import FTP
 import zipfile
 import io
 import pandas as pd
-from FTPData import rename_columns
+import os
 
 
 def get_ftp_path(era):
@@ -59,7 +59,7 @@ def zipfilestring_to_stationID(fullzipstring, era):
         
     
     if era == 'historical':        
-        stationID = int(filestring.split('_')[1])        
+        stationID = filestring.split('_')[1]       
     elif era == 'recent':        
         stationID = filestring.split('_')[2]        
     else:        
@@ -142,5 +142,73 @@ def get_all_zipfile_names(path):
     return zipfile_names
     
     
+    
+
+def set_up_directories(era='all'):
+    
+    """
+    Delete old directories in the selected folder of the specified era(s) and 
+    create new empty directories.
+    
+    INPUT
+    ------
+    era: string specifying the path to return, either 'recent', 'historical' or
+            'all'
+    OUTPUT
+    ------
+    no output.
+    
+    """
+    string_1 ='downloaded_data'
+    string_1a = 'historical'
+    string_1b = 'recent'
+    masterpath = os.getcwd()
+    
+    if era == 'all':
+        #Check if directory exists and delete it if so
+        if os.path.isdir('downloaded_data'):
+            import shutil
+            shutil.rmtree('downloaded_data')
+        #Create directories
+        os.mkdir(string_1)
+        os.chdir(string_1)
+        os.mkdir(string_1a)
+        os.mkdir(string_1b)
+        os.chdir(masterpath)
+        
+    elif era == 'historical':
+        #Check if directory exists and delete it if so
+        if os.path.isdir('downloaded_data/'+era):
+            import shutil
+            shutil.rmtree('downloaded_data/'+era)
+        #Create directories
+        if os.path.isdir('downloaded_data/'):
+            os.chdir(string_1)
+            os.mkdir(string_1a)
+            os.chdir(masterpath)
+        else:
+            os.mkdir(string_1)
+            os.chdir(string_1)
+            os.mkdir(string_1a)
+            os.chdir(masterpath)
+
+    elif era == 'recent':
+        #Check if directory exists and delete it if so
+        if os.path.isdir('downloaded_data/'+era):
+            import shutil
+            shutil.rmtree('downloaded_data/'+era)
+        #Create directories
+        if os.path.isdir('downloaded_data/'):
+            os.chdir(string_1)
+            os.mkdir(string_1b)
+            os.chdir(masterpath)
+        else:
+            os.mkdir(string_1)
+            os.chdir(string_1)
+            os.mkdir(string_1b)
+            os.chdir(masterpath)
+            
+            
+            
 
 #if __name__ in '__main__':    
