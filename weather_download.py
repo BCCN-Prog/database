@@ -137,7 +137,8 @@ def get_all_zipfile_names(path):
     
     ftp = FTP('ftp-cdc.dwd.de')
     ftp.login()
-    zipfile_names = ftp.nlst(path)  
+    zipfile_names = ftp.nlst(path)
+    zipfile_names = [fname for fname in zipfile_names if fname.endswith('.zip')]
     
     return zipfile_names
     
@@ -207,8 +208,100 @@ def set_up_directories(era='all'):
             os.chdir(string_1)
             os.mkdir(string_1b)
             os.chdir(masterpath)
+        
+        
+            
+def download_data_as_txt_file(zipfilename):
+    
+    """
+    Downloading the Text-file containg all the relevant weather data from
+    one zip file.
+    
+    INPUT   
+    -----    
+    zipfilename : Name of the zip-file the text-file is contained as a string
+    
+    OUTPUT
+    ------
+    No output
+    
+    """
+    ftp = FTP('ftp-cdc.dwd.de')
+    ftp.login()
+    
+    fh = io.BytesIO()
+    ftp.retrbinary('RETR %s' % zipfilename, fh.write)
+    fh.seek(0) # rewind pseudo-file
+    myzip = zipfile.ZipFile(fh)
+
+    list_in_zip = myzip.namelist() # list names 
+    
+    txtfilename = ''
+    for name in list_in_zip:
+        # the txt-file we need starts with 'produkt_klima_...'
+        if name.startswith('produkt_klima_Tageswerte'):
+            txtfilename = name
+            break   
+            
+    savename = get_txtfile_savename(zipfilename)
+
+    masterpath = os.getcwd()
+    os.chdir('downloaded_data/% s' % get_era_from_zipstring(zipfilename))
+    
+    txtfile = myzip.open(txtfilename, "r")  
+    
+    data=pd.read_csv(txtfile, sep=';')    
+
+    data.to_csv(savename +'.txt')
+
+    txtfile.close()    
+    os.chdir(masterpath)
             
             
+
+def download_weather_data(era = 'all', verbose = False):
+    
+    
+    set_up_directories(era)
+
+    if era == 'all':
+        
+        for e in ['recent', 'historical']:
             
+            if verbose:
+                print('downloading '+e+' data..')
+            
+            ftp_path = get_ftp_path(e)
+            
+            listfiles = get_all_zipfile_names(ftp_path)
+            
+            count = 0            
+            
+            for zipfilename in listfiles:
+                
+                if verbose:
+                    print(count+1,'/',len(listfiles))
+                
+                download_data_as_txt_file(zipfilename)
+                   
+    elif era == 'historical' or era == 'recent':
+        
+            if verbose:
+                print('downloading '+era+' data..')
+
+            ftp_path = get_ftp_path(era)
+            
+            listfiles = get_all_zipfile_names(ftp_path)
+            
+            for zipfilename in listfiles:
+                
+                if verbose:
+                    print(count+1,'/',len(listfiles))
+                
+                download_data_as_txt_file(zipfilename)
+
+    else:
+        raise NameError("Era has to be either 'recent' or 'historical' or 'all'!")
+
 
 #if __name__ in '__main__':    
