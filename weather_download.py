@@ -303,7 +303,7 @@ def download_weather_data(era = 'all', verbose = False):
                 
             if verbose:
                 total_time = time()-starttime
-                print('The download for the '+e+' data took %5 s'%total_time)
+                print('The download for the '+e+' data took %5.1f s'%total_time)
                 
                    
     elif era == 'historical' or era == 'recent':
@@ -327,7 +327,7 @@ def download_weather_data(era = 'all', verbose = False):
                 
             if verbose:
                 total_time = time()-starttime
-                print('The download for the '+e+' data took %5 s'%total_time)
+                print('The download for the '+e+' data took %5.1f s'%total_time)
 
     else:
         raise NameError("Era has to be either 'recent' or 'historical' or 'all'!")
