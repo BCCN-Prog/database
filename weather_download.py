@@ -460,6 +460,77 @@ def get_txtfilename(ID, era):
 
 
 
+def load_station(ID,era):
+    """
+    Loads the data from one station for given era into a dataframe.
+    
+    INPUT
+    -----
+    ID   :  string with 5 digits of specifying station ID
+    era  :  string specifying the path to return, either 'recent', 'historical'
+    
+    OUPUT
+    -----
+    df   :   dataframe containing all the data from that station  
+    
+    """
+    
+    check_for_weather_data(era)
+    check_for_station(ID,era)
+    
+    txtfilename = get_txtfilename(ID,era)
+    
+    df = pd.read_csv('downloaded_data/'+era+'/'+txtfilename)
+    df = df.drop(df.columns[0], axis = 1)
+    
+    return df
+    
+    
+
+def get_timerange(df):
+
+    """
+    INPUT
+    ------
+    df: a single dataframe
+
+    OUTPUT
+    ------
+    list with the first and last dates of the data frame [time_from, time_to]"""
+
+
+    timerange = [df.iloc[0,1], df.iloc[-1,1]]
+    return(timerange)
+
+
+
+def merge_eras(df_hist, df_rec):
+    """
+    Merges historical with recent data and removes overlapping entries.
+    
+    INPUT
+    ------
+    df_hist:  Historical data, loaded into a pandas daraframe
+    df_rec: Recent data, loaded into a pandas daraframe
+    
+    OUTPUT
+    ------
+    df_no_overlap: Retuns one timecontinuous datafrom, without duplicates.
+    
+    """
+    df_merged = pd.concat([df_hist,df_rec], axis=0)
+    df_no_overlap = pd.DataFrame.drop_duplicates(df_merged)
+    return df_no_overlap
+    
+    
+
+def extract_times(df,  time_from, time_to):
+    
+    df_to = df[df['Date' <= time_to]]
+    print(df_to)
+    df_from_to = df_to[df_to['Date' >= time_from]]
+    
+    return df_from_to
 
 
 #if __name__ in '__main__':    
