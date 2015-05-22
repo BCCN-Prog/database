@@ -8,6 +8,7 @@ import zipfile
 import io
 import pandas as pd
 import os
+from time import time 
 
 
 def get_ftp_path(era):
@@ -261,6 +262,11 @@ def download_data_as_txt_file(zipfilename):
 
 def download_weather_data(era = 'all', verbose = False):
     
+    """
+    Downloads all the 
+    """    
+    
+    
     
     set_up_directories(era)
 
@@ -270,6 +276,7 @@ def download_weather_data(era = 'all', verbose = False):
             
             if verbose:
                 print('downloading '+e+' data..')
+                starttime = time()
             
             ftp_path = get_ftp_path(e)
             
@@ -283,11 +290,17 @@ def download_weather_data(era = 'all', verbose = False):
                     count +=1
                 
                 download_data_as_txt_file(zipfilename)
+                
+            if verbose:
+                total_time = time()-starttime
+                print('The download for the '+e+' data took %5 s'%total_time)
+                
                    
     elif era == 'historical' or era == 'recent':
         
             if verbose:
                 print('downloading '+era+' data..')
+                starttime = time()
 
             ftp_path = get_ftp_path(era)
             
@@ -301,6 +314,10 @@ def download_weather_data(era = 'all', verbose = False):
                     count +=1
                 
                 download_data_as_txt_file(zipfilename)
+                
+            if verbose:
+                total_time = time()-starttime
+                print('The download for the '+e+' data took %5 s'%total_time)
 
     else:
         raise NameError("Era has to be either 'recent' or 'historical' or 'all'!")
