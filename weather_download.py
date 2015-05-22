@@ -333,4 +333,106 @@ def download_weather_data(era = 'all', verbose = False):
         raise NameError("Era has to be either 'recent' or 'historical' or 'all'!")
 
 
+
+
+
+def rename_columns(data_ger):
+    
+    column_names = data_ger.columns.values
+    data_eng = data_ger.rename(columns = {column_names[0]: 'Station ID',
+                                          column_names[1]: 'Date',
+                                          column_names[2]: 'Quality Level',
+                                          column_names[3]: 'Air Temperature',
+                                          column_names[4]: 'Vapor Pressure',
+                                          column_names[5]: 'Degree of Coverage',
+                                          column_names[6]: 'Air Pressure',
+                                          column_names[7]: 'Rel Humidity',
+                                          column_names[8]: 'Wind Speed',
+                                          column_names[9]: 'Max Air Temp',
+                                          column_names[10]: 'Min Air Temp',
+                                          column_names[11]: 'Min Groundlvl Temp',
+                                          column_names[12]: 'Max Wind Speed',
+                                          column_names[13]: 'Precipitation',
+                                          column_names[14]: 'Precipitation Ind',
+                                          column_names[15]: 'Hrs of Sun',                                          
+                                          column_names[16]: 'Snow Depth', })
+                                          
+    return data_eng
+
+
+
+
+
+def clean_dataframe(df):
+    """
+    Cleans the raw weather data (i.e. dropping the eor column, dropping the na 
+    row, making the 'Station ID' type int, replace -999 values by nan, 
+    sorting the dataframe by 'Station ID' and 'Date', making the 'Date' type
+    string, adding a 'Year', 'Month' and 'Day' column) in the dataframe and 
+    renames the German column to their English equivalent.
+    
+    INPUT   
+    -----    
+    df : Raw dataframe
+    
+    OUTPUT
+    ------
+    df : Clean dataframe
+    
+    """
+    
+    if 'eor' in df:
+        df=df.drop('eor', 1)   
+    
+    df=df.dropna(axis = 0)
+    df.iloc[:,0] = int(df.iloc[0,0])    
+         
+    df=rename_columns(df)
+    df=df.sort(['Station ID', 'Date'])
+    df=df.replace(to_replace = -999, value = float('nan'))
+    df['Date']=df['Date'].astype(int).astype(str)
+    df['Year']=[date[0:4] for date in df['Date']]
+    df['Month']=[date[4:6] for date in df['Date']]
+    df['Day']=[date[6:8] for date in df['Date']]
+
+    return df
+    
+    
+
+
+
+def check_for_weather_data(era):
+    
+    """
+    Check if there is data in the 'era' directory below directories 'downloaded_weather'.
+    
+    INPUT
+    ------
+    era: string specifying the path to return, either 'recent', 'historical'
+    
+    OUTPUT
+    ------
+    not output  
+    """
+
+    if not os.path.isdir('downloaded_data'):
+        raise NameError("There is no 'downloaded_data' directory.\n You either have to download\
+            the weather data using 'download_weather_data' or move to the right\
+            directory.' ")
+            
+    else:   
+        if not os.path.isdir('downloaded_data/'+era):
+            raise NameError("You don't have the ",era," data, download it first.")
+            
+        else:
+            if os.listdir(os.getcwd()+'/downloaded_data/'+era) == []:
+                raise NameError("You don't have the ",era," data, download it first.")
+
+
+
+
+
+
+
+
 #if __name__ in '__main__':    
