@@ -263,7 +263,17 @@ def download_data_as_txt_file(zipfilename):
 def download_weather_data(era = 'all', verbose = False):
     
     """
-    Downloads all the 
+    Downloads all the data for specified era to local directory by creating
+    new directory weather_downloads.
+    
+    INPUT
+    ------
+    era: string specifying the path to return, either 'recent', 'historical' or
+            'all', default is 'all'
+    
+    OUTPUT
+    ------
+    not output
     """    
     
     
