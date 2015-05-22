@@ -275,12 +275,12 @@ def download_weather_data(era = 'all', verbose = False):
             
             listfiles = get_all_zipfile_names(ftp_path)
             
-            count = 0            
-            
+            count = 0                 
             for zipfilename in listfiles:
                 
                 if verbose:
                     print(count+1,'/',len(listfiles))
+                    count +=1
                 
                 download_data_as_txt_file(zipfilename)
                    
@@ -293,10 +293,12 @@ def download_weather_data(era = 'all', verbose = False):
             
             listfiles = get_all_zipfile_names(ftp_path)
             
+            count = 0
             for zipfilename in listfiles:
                 
                 if verbose:
                     print(count+1,'/',len(listfiles))
+                    count +=1
                 
                 download_data_as_txt_file(zipfilename)
 
