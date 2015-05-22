@@ -431,6 +431,33 @@ def check_for_weather_data(era):
 
 
 
+def check_for_station(ID, era):
+    
+    """
+    Check if there is a station specified by ID for given era.
+    
+    INPUT
+    -----
+    ID   :  string with 5 digits of specifying station ID
+    era  : string specifying the path to return, either 'recent', 'historical'
+    
+    OUPUT
+    -----
+    no output
+    """
+
+    txtfilename = get_txtfilename(ID,era)
+    
+    if txtfilename not in os.listdir(os.getcwd()+'/downloaded_data/'+era):
+        raise NameError("There is no station ",ID," in the ",era," data.")
+
+
+
+def get_txtfilename(ID, era):
+    """ Return the txtfilename given by station ID and era in correct format."""
+    
+    return era+'_'+ID+'.txt'
+
 
 
 
