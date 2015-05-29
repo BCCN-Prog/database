@@ -192,9 +192,9 @@ def merge_eras(df_hist, df_rec):
 
 def extract_times(df,  time_from, time_to):
     
-    df_to = df[df['Date' <= time_to]]
+    df_to = df[df['Date'] <= time_to]
     print(df_to)
-    df_from_to = df_to[df_to['Date' >= time_from]]
+    df_from_to = df_to[df_to['Date'] >= time_from]
     
     return df_from_to
 
@@ -213,8 +213,8 @@ def load_dataframe(IDs, time_from, time_to):
     INPUT
     -----
     IDs       :  list of station IDs (5 digit strings)
-    time_from :  lower bound of the timespan to be returned
-    time_to   :  upper bound of the timespan to be returned
+    time_from :  lower bound of the timespan to be returned string format 'yyyymmdd'
+    time_to   :  upper bound of the timespan to be returned string format 'yyyymmdd'
     
     OUTPUT
     ------
@@ -236,13 +236,19 @@ def load_dataframe(IDs, time_from, time_to):
         timerange_hist = get_timerange(current_df_hist)
         
         
-        if time_from < timerange_hist[0] or time_to > timerange_rec[1]:
+        if str(time_from) < timerange_hist[0] or str(time_to) > timerange_rec[1]:
             raise NameError('Dates are either too far in the past or the future,\
             the valid timerange is from %s to %s' %(timerange_hist[0],timerange_rec[1]))
 
         current_df = merge_eras(current_df_hist, current_df_rec)
         current_df = extract_times(current_df, time_from, time_to)
-        
+
+        #indices = pd.Timestamp(current_df.loc[''])
+        #date_form =  current_df.index.values.astype(str)
+
         dict_of_stations[ID] = current_df
 
     return dict_of_stations
+
+#if __name__ == '__main__':
+ #   print(load_dataframe(['02712'], '20140101', '20150101'))
