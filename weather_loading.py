@@ -60,6 +60,8 @@ def clean_dataframe(df):
     df['Year']=[date[0:4] for date in df['Date']]
     df['Month']=[date[4:6] for date in df['Date']]
     df['Day']=[date[6:8] for date in df['Date']]
+    ID_to_citynames, citynames_to_ID = get_cities()
+    df['City'] = [ID_to_citynames[ID] for ID in df['Station ID']]
 
     return df
     
@@ -197,6 +199,45 @@ def extract_times(df,  time_from, time_to):
     df_from_to = df_to[df_to['Date'] >= str(time_from)]
     
     return df_from_to
+    
+def get_cities(filename = 'downloaded_data/DWD_City_List.txt'):
+    """
+    Reads cities and ids from textfile 
+    
+    INPUT
+    -----
+    filename: Filename of the txt-File, where all cities and station IDs are
+              inside
+    
+    OUTPUT
+    ------
+    ID_to_citynames:  Dictionary that maps station IDs to citynames
+    
+    citynames_to_ID: Dictionary that maps citynames to station IDs
+    """
+    
+    # Attention! The textfile given by the DWD is encoded in Latin-1.
+    # Python3 uses utf-8 by default, so we have to specify it here.
+    # In Python2 none of this will work, the open() function doesn't
+    # even accept encode= as a parameter.
+    with open(filename, 'rt', encoding='Latin-1') as text_file:
+        # Read the first two lines, which we don't need.        
+        text_file.readline()
+        text_file.readline()
+        
+        ID_to_citynames = {}
+        citynames_to_ID = {}
+        
+        for line in text_file:
+            try:
+                ID = int(line[:11])
+                city_name = line[67:108].strip()
+                ID_to_citynames[ID] =  city_name
+                citynames_to_ID[city_name] = ID
+            except ValueError:
+                pass
+    
+        return ID_to_citynames, citynames_to_ID
 
 
 
