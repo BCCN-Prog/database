@@ -82,17 +82,17 @@ def check_for_weather_data(era):
     """
 
     if not os.path.isdir('downloaded_data'):
-        raise NameError("There is no 'downloaded_data' directory.\n You either have to download\
+        raise OSError("There is no 'downloaded_data' directory.\n You either have to download\
             the weather data using 'download_weather_data' or move to the right\
             directory.' ")
             
     else:   
         if not os.path.isdir('downloaded_data/'+era):
-            raise NameError("You don't have the ",era," data, download it first.")
+            raise OSError('You dont have the '+era+' data, download it first.')
             
         else:
             if os.listdir(os.getcwd()+'/downloaded_data/'+era) == []:
-                raise NameError("You don't have the ",era," data, download it first.")
+                raise OSError('You dont have the '+era+' data, download it first.')
 
 
 
@@ -115,7 +115,7 @@ def check_for_station(ID, era):
     txtfilename = get_txtfilename(ID,era)
     
     if txtfilename not in os.listdir(os.getcwd()+'/downloaded_data/'+era):
-        raise NameError("There is no station ",ID," in the ",era," data.")
+        raise ValueError('There is no station '+ID+' in the '+era+' data.')
 
 
 
@@ -237,8 +237,12 @@ def load_dataframe(IDs, time_from, time_to):
         
         
         if str(time_from) < timerange_hist[0] or str(time_to) > timerange_rec[1]:
-            raise NameError('Dates are either too far in the past or the future,\
-            the valid timerange is from %s to %s' %(timerange_hist[0],timerange_rec[1]))
+            raise ValueError('Dates are either too far in the past or the future, '
+            'the valid timerange is from %s to %s' %(timerange_hist[0],timerange_rec[1]))
+            
+        if str(time_from) > str(time_to):
+            raise ValueError('The time_from (%s) is later than the time_to (%s)!'\
+                                %(str(time_from), str(time_to)))
 
         current_df = merge_eras(current_df_hist, current_df_rec)
         current_df = extract_times(current_df, time_from, time_to)
@@ -253,4 +257,4 @@ def load_dataframe(IDs, time_from, time_to):
     return dict_of_stations
 
 if __name__ == '__main__':
-    load_dataframe(['02712'], '20140101', '20150101')
+    df = load_dataframe(['02712','00003'], '20140101', '20150101')
