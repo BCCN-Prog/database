@@ -8,9 +8,8 @@ import zipfile
 import io
 import pandas as pd
 import os
-from time import time
-import getopt
-import sys
+from time import time 
+
 
 def get_ftp_path(era):
     
@@ -31,7 +30,7 @@ def get_ftp_path(era):
     elif era == 'recent':
         return '/pub/CDC/observations_germany/climate/daily/kl/recent/'
     else:
-        raise ValueError('Input string not recognized')
+        raise NameError('Input string not recognized')
         
         
 
@@ -57,7 +56,7 @@ def zipfilestring_to_stationID(fullzipstring, era):
         zipstring = fullzipstring[len(ftp_path):]
         filestring = zipstring[:-4]      
     else:       
-        raise ValueError('This is not the correct full zipstring!')
+        raise NameError('This is not the correct full zipstring!')
         
     
     if era == 'historical':        
@@ -65,7 +64,7 @@ def zipfilestring_to_stationID(fullzipstring, era):
     elif era == 'recent':        
         stationID = filestring.split('_')[2]        
     else:        
-        raise ValueError('Requested era is not valid! It has to be historical or\
+        raise NameError('Requested era is not valid! It has to be historical or\
                                                                     recent.')
     
     return stationID
@@ -91,7 +90,7 @@ def get_era_from_zipstring(fullzipstring):
     elif  fullzipstring.startswith(get_ftp_path('recent')):        
         return 'recent'        
     else:
-        raise ValueError('Input string does not start with recent or historical\
+        raise NameError('Input string does not start with recent or historical\
                             ftp-path!')
 
 
@@ -147,7 +146,7 @@ def get_all_zipfile_names(path):
     
     
 
-def set_up_directories(download_path, era='all'):
+def set_up_directories(era='all'):
     
     """
     Delete old directories in the selected folder of the specified era(s) and 
@@ -165,9 +164,7 @@ def set_up_directories(download_path, era='all'):
     string_1 ='downloaded_data'
     string_1a = 'historical'
     string_1b = 'recent'
-    masterpath = download_path
-    path_before = os.getcwd()
-    os.chdir(masterpath)
+    masterpath = os.getcwd()
     
     if era == 'all':
         #Check if directory exists and delete it if so
@@ -212,12 +209,10 @@ def set_up_directories(download_path, era='all'):
             os.chdir(string_1)
             os.mkdir(string_1b)
             os.chdir(masterpath)
-            
-    os.chdir(path_before)
         
         
             
-def download_data_as_txt_file(zipfilename, download_path):
+def download_data_as_txt_file(zipfilename):
     
     """
     Downloading the Text-file containg all the relevant weather data from
@@ -251,8 +246,8 @@ def download_data_as_txt_file(zipfilename, download_path):
             
     savename = get_txtfile_savename(zipfilename)
 
-    masterpath = download_path
-    os.chdir(masterpath+'/downloaded_data/% s' % get_era_from_zipstring(zipfilename))
+    masterpath = os.getcwd()
+    os.chdir('downloaded_data/% s' % get_era_from_zipstring(zipfilename))
     
     txtfile = myzip.open(txtfilename, "r")  
     
@@ -265,7 +260,7 @@ def download_data_as_txt_file(zipfilename, download_path):
             
             
 
-def download_weather_data(download_path,era = 'all', verbose = False):
+def download_weather_data(era = 'all', verbose = False):
     
     """
     Downloads all the data for specified era to local directory by creating
@@ -281,10 +276,9 @@ def download_weather_data(download_path,era = 'all', verbose = False):
     not output
     """    
     
-    if not os.path.isdir(download_path):
-        raise OSError('Download path is not valid!')
     
-    set_up_directories(download_path, era = era)
+    
+    set_up_directories(era)
 
     if era == 'all':
         
@@ -305,7 +299,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
                     print(count+1,'/',len(listfiles))
                     count +=1
                 
-                download_data_as_txt_file(zipfilename, download_path)
+                download_data_as_txt_file(zipfilename)
                 
             if verbose:
                 total_time = time()-starttime
@@ -329,60 +323,14 @@ def download_weather_data(download_path,era = 'all', verbose = False):
                     print(count+1,'/',len(listfiles))
                     count +=1
                 
-                download_data_as_txt_file(zipfilename, download_path)
+                download_data_as_txt_file(zipfilename)
                 
             if verbose:
                 total_time = time()-starttime
                 print('The download for the '+era+' data took %5.1f s'%total_time)
 
     else:
-        raise ValueError("Era has to be either 'recent' or 'historical' or 'all'!")
+        raise NameError("Era has to be either 'recent' or 'historical' or 'all'!")
 
 
-def print_readme():
-    """Print README.txt"""
-    readme_file = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '..', 'README.txt'))
-    with open(readme_file, 'r') as fp:
-            print(fp.read())
-
-
-
-if __name__ in '__main__':
-    
-    """The CLI, argv is sys.argv"""
-    path = os.getcwd()
-    era = 'all'
-    verbose = False
-
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], 'h', ['era=', 'folder=', \
-                                                        'verbosity', 'help'])
-    except getopt.GetoptError:
-        print('Naaaaa.. i dont think so')
-        print('print readme ...')
-#        print(('Because you obviously did not read README.txt, '
-#              'I will print it for you.'))
-#        print()
-#        print('------------README.txt------------')
-#        print_readme()
-        sys.exit(2)
-
-    for opt, arg in opts:
-        if opt == '--verbosity':
-            verbose = True
-        elif opt == '--era':
-            era = arg
-        elif opt == '--folder':
-            path = arg
-        elif opt == '-h' or opt == '--help':
-            print('print readme.....')
-            #print_readme()
-            sys.exit()
-    
-    if verbose:
-        print('Downloading '+era+' data to '+path)
-    
-    download_weather_data(path, era = era, verbose = verbose)
-
-
+#if __name__ in '__main__':    
