@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import operator
 
+from pylab import rcParams
+rcParams['figure.figsize'] = 20, 3 #setting plots size
 
 #creating test time series
 #rng = pd.date_range('1/1/2011', periods=5000, freq='D')
@@ -117,31 +119,32 @@ def get_statistics(time_series,resolution='month',function=finding_min,average=T
     
 
 def plot_means(time_series, resolution='month', number=1):     
-    #takes timeseries as an imput, makes month-years dataframe, plots one row of it
-    #now only works with mobths
+    #takes timeseries as an input, makes resolution-years dataframe
+    #returns list of years, list of mean values for one row
     new_frame=calculating_means(time_series,resolution)
     if type(new_frame) == pd.core.frame.DataFrame:
         ToPlot=new_frame.iloc[number] # to acess one row, 
     else:
         ToPlot=new_frame #if we are dealing with years 
-    
-    #plotting
-    plt.figure()
-    x =np.arange(len(ToPlot))
-    plt.plot(x,ToPlot,'o')
-    #plt.xticks(list(np.arange(len(ToPlot))),new_frame.columns.values.tolist())
-    #doesn't work for years 
-    plt.xlim(x[0]-0.5,x[-1]+0.5)
-    plt.show()    
+    plotting_indices=ToPlot.index.tolist() 
+    #get years
+    return plotting_indices,ToPlot
 
+#loading dara
 Data=load_data('db.txt')
 timeSeries=get_data(Data,1)
-plot_means(timeSeries,resolution='year')
-print(get_statistics(timeSeries,resolution='year',function=finding_max,average=True))
+
+#Finding means to plot
+Indices,Values=plot_means(timeSeries,resolution='year',number=10)
+
+#just plotting
+plt.figure()
+plt.plot(Indices,Values,'o')
+plt.xlim(Indices[0]-0.5,Indices[-1]+0.5)
+plt.show()
+
+#Finding min/max
+print(get_statistics(timeSeries,resolution='dayofyear',function=finding_max,average=True))
 
 #dayofyear attribute returns 1...365, not day-month
 #also decided not to do statistics on 29-02, so preprocessing has to delete it
-
-#Plotting
-
-##different kinds of plots...
