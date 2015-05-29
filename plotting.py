@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import operator
+import click
+import datetime
 
 from pylab import rcParams
 rcParams['figure.figsize'] = 20, 3 #setting plots size
@@ -130,6 +132,7 @@ def plot_means(time_series, resolution='month', number=1):
     #get years
     return plotting_indices,ToPlot
 
+'''
 #loading dara
 Data=load_data('db.txt')
 timeSeries=get_data(Data,1)
@@ -147,4 +150,58 @@ plt.show()
 print(get_statistics(timeSeries,resolution='dayofyear',function=finding_max,average=True))
 
 #dayofyear attribute returns 1...365, not day-month
-#also decided not to do statistics on 29-02, so preprocessing has to delete it
+#also decided not to do statistics on 29-02, so preprocessing has to delete it'''
+
+helpstring = """Enter the code of measure(s) you want to obtain.
+The codes for variables:
+0: Numerical Index
+1: STATIONS_ID
+2: QUALITAETS_NIVEAU
+3: Air Temperature / LUFTTEMPERATUR
+4: DAMPFDRUCK
+5: BEDECKUNGSGRAD
+6: LUFTDRUCK_STATIONSHOEHE
+7: REL_FEUCHTE
+8: WINDGESCHWINDIGKEIT
+9: Max Air Temperature
+10: Min Air Temperature
+11: LUFTTEMP_AM_ERDB_MINIMUM (?)
+12: Max Wind Speed / WINDSPITZE_MAXIMUM
+13: Precipitation Height / NIEDERSCHLAGSHOEHE (?)
+14: NIEDERSCHLAGSHOEHE_IND (?)
+15: Sunshine Duration
+16: Snow Height"""
+
+@click.command()
+@click.option('--startyear', type=click.INT, default=1980, \
+    help="Enter year that you want to begin your query as INT")
+@click.option("--endyear", type=click.INT, default=1981, \
+    help="Enter year that you want to begin your query as INT")
+@click.option("--measure", type=click.INT, default=3, help=helpstring)
+@click.option("--resolution", type=click.STRING, default="month", \
+    help="Enter the time measure that you want. \n 'dayofyear', 'month' or 'year'")
+@click.option("--function", type=click.STRING, default="min", \
+    help="Enter the function you want to use. 'min' or 'max'")
+@click.option("--average", type=click.BOOL, default=True, \
+    help="Enter if you want the average of the given data")
+
+def main(startyear, endyear, measure, resolution, function, average):
+    data = load_data("db.txt")
+    start = str(startyear)
+    end = str(endyear)
+
+    func_dict = {'min':finding_min, 'max':finding_max}
+
+    data_slice = get_data(data, 1, measure, start, end)
+
+    final_stats = get_statistics(data_slice, resolution, func_dict[function], average)
+
+    if resolution == 'dayofyear':
+        print(final_stats[0])
+        print((datetime.datetime(final_stats[1], 1, 1) + datetime.timedelta(int(final_stats[2]) - 1)).date())
+    else:
+        print(final_stats)
+    return final_stats
+
+if __name__ == "__main__":
+    main()
