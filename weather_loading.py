@@ -195,7 +195,6 @@ def merge_eras(df_hist, df_rec):
 def extract_times(df,  time_from, time_to):
     
     df_to = df[df['Date'] <= str(time_to)]
-    print(df_to)
     df_from_to = df_to[df_to['Date'] >= str(time_from)]
     
     return df_from_to
