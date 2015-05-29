@@ -192,9 +192,9 @@ def merge_eras(df_hist, df_rec):
 
 def extract_times(df,  time_from, time_to):
     
-    df_to = df[df['Date'] <= time_to]
+    df_to = df[df['Date'] <= str(time_to)]
     print(df_to)
-    df_from_to = df_to[df_to['Date'] >= time_from]
+    df_from_to = df_to[df_to['Date'] >= str(time_from)]
     
     return df_from_to
 
@@ -246,9 +246,11 @@ def load_dataframe(IDs, time_from, time_to):
         #indices = pd.Timestamp(current_df.loc[''])
         #date_form =  current_df.index.values.astype(str)
 
-        dict_of_stations[ID] = current_df
+        current_df['Date'] = pd.to_datetime(current_df['Date'])
+        current_df = current_df.set_index('Date')
 
+        dict_of_stations[ID] = current_df
     return dict_of_stations
 
-#if __name__ == '__main__':
- #   print(load_dataframe(['02712'], '20140101', '20150101'))
+if __name__ == '__main__':
+    load_dataframe(['02712'], '20140101', '20150101')
