@@ -374,8 +374,11 @@ def download_weather_data(download_path,era = 'all', verbose = False):
 
 def print_readme():
     """Print README.txt"""
-    readme_file = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '..', 'README.txt'))
+    
+    readme_file = 'README.txt'
+    
+    #os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                                           '..', 'README.txt'))
     with open(readme_file, 'r') as fp:
             print(fp.read())
 
@@ -394,11 +397,11 @@ if __name__ in '__main__':
     except getopt.GetoptError:
         print('Naaaaa.. i dont think so')
         print('print readme ...')
-#        print(('Because you obviously did not read README.txt, '
-#              'I will print it for you.'))
-#        print()
-#        print('------------README.txt------------')
-#        print_readme()
+        print(('Because you obviously did not read README.txt, '
+              'I will print it for you.'))
+        print()
+        print('------------README.txt------------')
+        print_readme()
         sys.exit(2)
 
     for opt, arg in opts:
@@ -409,8 +412,8 @@ if __name__ in '__main__':
         elif opt == '--folder':
             path = arg
         elif opt == '-h' or opt == '--help':
-            print('print readme.....')
-            #print_readme()
+            print('------------README.txt------------')
+            print_readme()
             sys.exit()
     
     if verbose:
