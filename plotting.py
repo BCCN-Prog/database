@@ -30,13 +30,22 @@ def calculating_yearly_means(time_series,resolution='month'):
     return df2
 
 def calculating_total_means(time_series,resolution='month'):
+    '''
+    :param time_series: pandas time series indexed with days
+    :param resolution: 'month' or 'dayofyear' or 'year'
+    :return: averaging over the years over calculating_yearly_means(time_series,resolution)
+    '''
     new_frame=calculating_yearly_means(time_series,resolution)
     if resolution !='year':
         new_frame=new_frame.mean(axis=1) #calculating averages
     return new_frame
 
 def finding_max(data_frame):
-    #same as finding_min
+    '''
+    :param data_frame: pandas dataFrame
+    :return: the maximum and the index of the maximum for the data_frame
+    '''
+
     if type(data_frame)==pd.core.frame.DataFrame:
         maximums, maximum_idces=data_frame.max(), data_frame.idxmax()
         maximum,maximum_idx_1=maximums.max(),maximums.idxmax()
@@ -47,8 +56,12 @@ def finding_max(data_frame):
 
 
 def finding_min(data_frame):
-    #we pass to this function TimeSeries after preprocessing
-    if type(data_frame)==pd.core.frame.DataFrame:
+    '''
+    :param data_frame: pandas dataFrame
+    :return: the minimum and the index of the minimum for the data_frame
+    '''
+
+    if type(data_frame) == pd.core.frame.DataFrame:
         #if not averaging, the input is data frame
         #makes things more complicated
         minimums, minimum_idces=data_frame.min(), data_frame.idxmin()
@@ -92,10 +105,18 @@ def compare_statistics(time_series,resolution='dayofweek',slice1=[0,5],slice2=[5
     return statistics1, statistics2
 
 def compare_weather(time_series,resolution='dayofweek',slice1=[0,5],slice2=[5,7]):
-    temperature=compare_statistics(time_series.iloc[:,3],resolution,slice1,slice2)
-    wind_speed=compare_statistics(time_series.iloc[:,12],resolution,slice1,slice2)
-    precipitation=compare_statistics(time_series.iloc[:,13],resolution,slice1,slice2)
-    sunshine=compare_statistics(time_series.iloc[:,15],resolution,slice1,slice2)
+    '''
+
+    :param time_series: pandas time series indexed with days
+    :param resolution: 'month' or 'dayofyear' or 'year' (makes sence only with 'dayofyear')
+    :param slice1: list of dayofweek as int to compare
+    :param slice2: another list of dayofweek as int to compare
+    :return: statistics for each slice ver the measures - temperature, wind_speed, percipitaion and sun hours.
+    '''
+    temperature=compare_statistics(pd.TimeSeries(time_series.iloc[:,3]),resolution,slice1,slice2)
+    wind_speed=compare_statistics(pd.TimeSeries(time_series.iloc[:,12]),resolution,slice1,slice2)
+    precipitation=compare_statistics(pd.TimeSeries(time_series.iloc[:,13]),resolution,slice1,slice2)
+    sunshine=compare_statistics(pd.TimeSeries(time_series.iloc[:,15]),resolution,slice1,slice2)
     return temperature,wind_speed,precipitation,sunshine
 
 helpstring = """Enter the code of measure(s) you want to obtain.
