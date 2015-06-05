@@ -8,48 +8,16 @@ from weather_loading import load_dataframe
 
 from pylab import rcParams
 rcParams['figure.figsize'] = 20, 3 #setting plots size
-
-
-def get_data(station_id, category = 3, start = '19890101', end = '20131231'):
-    """
-    (pandas.Dataframe, int, list) -> (pandas.DataFrame)
-    Returns desired information from the database about requested city and categories.
-    
-    station_id: The code for the requested city/station
-    
-    category: Can be an int of desired variable. By default gets the air temperature.
-    
-        The codes for variables:
-        0: Date Index
-        1: STATIONS_ID
-        2: QUALITAETS_NIVEAU
-        3: Air Temperature / LUFTTEMPERATUR
-        4: DAMPFDRUCK
-        5: BEDECKUNGSGRAD
-        6: LUFTDRUCK_STATIONSHOEHE
-        7: REL_FEUCHTE
-        8: WINDGESCHWINDIGKEIT
-        9: Max Air Temperature
-        10: Min Air Temperature
-        11: LUFTTEMP_AM_ERDB_MINIMUM (?)
-        12: Max Wind Speed / WINDSPITZE_MAXIMUM
-        13: Precipitation Height / NIEDERSCHLAGSHOEHE (?)
-        14: NIEDERSCHLAGSHOEHE_IND (?)
-        15: Sunshine Duration
-        16: Snow Height
-
-    """
-
-    data = load_dataframe(station_id, start, end)
-    for station in data:
-        selected = data[station].iloc[:, category]
-
-    return pd.TimeSeries(selected)
  
 def calculating_yearly_means(time_series,resolution='month'):
-    #creates a DataFrame out of time series, rows-resolution, columns - years
-    #for resolution='year' returns Series, indices - years
-    #possible resolutions: 'dayofyear', 'month', 'year'
+    '''
+
+    :param time_series: pandas time series indexed with days
+    :param resolution: 'month' or 'dayofyear' or 'year'
+    :return DataFrame df[i,j] = mean of measure over resolution i of year j.
+            if resolution is 'year' returns and years as rows.
+    '''
+
     years = range(time_series.index.year[0], time_series.index.year[-1])
     #years in period
     yearly_resolution_stats = [time_series.xs(str(year)).groupby\
