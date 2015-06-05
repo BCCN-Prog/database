@@ -323,7 +323,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
         merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
     
         # overlap (kind of fine --> Warning)
-        if (xor(time_from < tmin, time_to > tmax)) or (time_from < tmin and time_to > tmax):
+        if (xor(time_from < timerange[0], time_to > timerange[1])) or (time_from < timerange[0] and time_to > timerange[1]):
             print(tmin,tmax)
             print(timerange)
             time_from = max(timerange[0], time_from)
@@ -332,7 +332,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
             ' be extracted!'.format(timefrom = time_from, timeto = time_to))
             
         # nothing's fine
-        elif (time_from < tmin and time_to < tmin) or (time_from > tmax and time_to > tmax):
+        elif (time_from < timerange[0] and time_to < timerange[0]) or (time_from > timerange[1] and time_to > timerange[1]):
             raise MissingDataError('For the timerange you have chosen there is '
             'no data available!')
         
