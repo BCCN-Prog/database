@@ -161,7 +161,7 @@ def set_city_files():
     
     """
     #Loading the city names' file
-    fname = 'downloaded_data/DWD_City_List.txt'
+    fname = os.path.join('downloaded_data','DWD_City_List.txt')
     
     path_before = os.getcwd()
 
@@ -215,11 +215,11 @@ def set_up_directories(download_path, era='all'):
         
     elif era == 'historical':
         #Check if directory exists and delete it if so
-        if os.path.isdir('downloaded_data/'+era):
+        if os.path.isdir(os.path.join('downloaded_data',era)):
             import shutil
-            shutil.rmtree('downloaded_data/'+era)
+            shutil.rmtree(os.path.join('downloaded_data',era))
         #Create directories
-        if os.path.isdir('downloaded_data/'):
+        if os.path.isdir('downloaded_data'):
             os.chdir(string_1)
             os.mkdir(string_1a)
             os.chdir(masterpath)
@@ -231,11 +231,11 @@ def set_up_directories(download_path, era='all'):
 
     elif era == 'recent':
         #Check if directory exists and delete it if so
-        if os.path.isdir('downloaded_data/'+era):
+        if os.path.isdir(os.path.join('downloaded_data',era)):
             import shutil
-            shutil.rmtree('downloaded_data/'+era)
+            shutil.rmtree(os.path.join('downloaded_data',era))
         #Create directories
-        if os.path.isdir('downloaded_data/'):
+        if os.path.isdir('downloaded_data'):
             os.chdir(string_1)
             os.mkdir(string_1b)
             os.chdir(masterpath)
@@ -284,7 +284,8 @@ def download_data_as_txt_file(zipfilename, download_path):
     savename = get_txtfile_savename(zipfilename)
 
     masterpath = download_path
-    os.chdir(masterpath+'/downloaded_data/% s' % get_era_from_zipstring(zipfilename))
+    
+    os.chdir(os.path.join(masterpath,'downloaded_data',get_era_from_zipstring(zipfilename)))
     
     txtfile = myzip.open(txtfilename, "r")  
     
