@@ -145,7 +145,7 @@ def get_all_zipfile_names(path):
     return zipfile_names
     
     
-def set_city_files():
+def set_city_files(download_path):
     
     """
     Download file with the city names and station IDs from the FTP server and 
@@ -163,7 +163,9 @@ def set_city_files():
     #Loading the city names' file
     fname = os.path.join('downloaded_data','DWD_City_List.txt')
     
+    masterpath = download_path
     path_before = os.getcwd()
+    os.chdir(masterpath)
 
 
     if not os.path.isfile(fname):
@@ -318,7 +320,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
         raise OSError('Download path is not valid!')
     
     set_up_directories(download_path, era = era)
-    set_city_files()
+    set_city_files(download_path)
     
     if era == 'all':
         
