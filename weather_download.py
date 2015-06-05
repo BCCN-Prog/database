@@ -44,7 +44,8 @@ def zipfilestring_to_stationID(fullzipstring, era):
     ------
     fullzipstring : string - a correct input should look like 
                         "<ftp_path>/<string_containing_id>.zip"
-    
+    era: string specifying the path to return, either 'recent' 
+            or 'historical'
     OUTPUT
     ------
     station_ID : Station ID of type string as 5 digit number
@@ -145,7 +146,7 @@ def get_all_zipfile_names(path):
     return zipfile_names
     
     
-def set_city_files():
+def set_city_files(download_path):
     
     """
     Download file with the city names and station IDs from the FTP server and 
@@ -153,7 +154,7 @@ def set_city_files():
     
     INPUT
     ------
-    no input.
+    download_path: folder path you where you want to save the data.	
     
     OUTPUT
     ------
@@ -163,7 +164,9 @@ def set_city_files():
     #Loading the city names' file
     fname = os.path.join('downloaded_data','DWD_City_List.txt')
     
+    masterpath = download_path
     path_before = os.getcwd()
+    os.chdir(masterpath)
 
 
     if not os.path.isfile(fname):
@@ -187,6 +190,7 @@ def set_up_directories(download_path, era='all'):
     
     INPUT
     ------
+    download_path: folder path you where you want to save the data.
     era: string specifying the path to return, either 'recent', 'historical' or
             'all'
     OUTPUT
@@ -258,6 +262,7 @@ def download_data_as_txt_file(zipfilename, download_path):
     INPUT   
     -----    
     zipfilename : Name of the zip-file the text-file is contained as a string
+    download_path: folder path you where you want to save the data.
     
     OUTPUT
     ------
@@ -306,6 +311,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
     
     INPUT
     ------
+    download_path: folder path you where you want to save the data.
     era: string specifying the path to return, either 'recent', 'historical' or
             'all', default is 'all'
     
@@ -318,7 +324,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
         raise OSError('Download path is not valid!')
     
     set_up_directories(download_path, era = era)
-    set_city_files()
+    set_city_files(download_path)
     
     if era == 'all':
         
