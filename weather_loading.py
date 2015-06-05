@@ -285,7 +285,8 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
             IDs.append(ID)
             
         else:
-            raise TypeError('You did not enter a correct ID or City.')
+            raise TypeError('You did not enter a correct ID or City. Call the function get_cities() \
+            to see the mapping dictionaries')
     
 
     
