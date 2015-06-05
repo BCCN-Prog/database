@@ -61,7 +61,7 @@ def clean_dataframe(df):
     df['Month']=[date[4:6] for date in df['Date']]
     df['Day']=[date[6:8] for date in df['Date']]
     ID_to_citynames, citynames_to_ID = get_cities()
-    df['City'] = [ID_to_citynames[ID] for ID in df['Station ID']]
+    df['City'] = [ID_to_citynames[str(ID).zfill(5)] for ID in df['Station ID']]
 
     return df
     
@@ -231,6 +231,7 @@ def get_cities(filename = 'downloaded_data/DWD_City_List.txt'):
             try:
                 ID = int(line[:11])
                 city_name = line[67:108].strip()
+                ID = str(ID).zfill(5)
                 ID_to_citynames[ID] =  city_name
                 citynames_to_ID[city_name] = ID
             except ValueError:
@@ -242,7 +243,7 @@ def get_cities(filename = 'downloaded_data/DWD_City_List.txt'):
 
 
 
-def load_dataframe(IDs, time_from, time_to):
+def load_dataframe(Cities_or_IDs, time_from, time_to):
     
     """
     Loops through the list of station IDs and loads the historical and recent
@@ -252,7 +253,7 @@ def load_dataframe(IDs, time_from, time_to):
     
     INPUT
     -----
-    IDs       :  list of station IDs (5 digit strings)
+    IDs       :  list of station IDs (5 digit strings) or corresponding list of cities 
     time_from :  lower bound of the timespan to be returned string format 'yyyymmdd'
     time_to   :  upper bound of the timespan to be returned string format 'yyyymmdd'
     
@@ -261,6 +262,33 @@ def load_dataframe(IDs, time_from, time_to):
     dictionary of time series
     
     """
+    if not isinstance( Cities_or_IDs, list):
+        Cities_or_IDs = [Cities_or_IDs]
+        
+    
+    ID_to_citynames, citynames_to_ID = get_cities()
+    #print(citynames_to_ID)
+    IDs=[]
+    
+    for string in Cities_or_IDs:
+    #Getting the mapping dictionaries
+        #print(string)
+        
+        #If Cities_or_IDs is the ID 
+        if string.isdigit():
+            IDs.append(string)
+            
+        
+        #If Cities_or_IDs is the the city name, mapping to the ID
+        elif string.isalpha():
+            ID = citynames_to_ID[string]
+            IDs.append(ID)
+            
+        else:
+            raise TypeError('You did not enter a correct ID or City.')
+    
+
+    
 
     dict_of_stations = {}
     
@@ -295,6 +323,7 @@ def load_dataframe(IDs, time_from, time_to):
 
         dict_of_stations[ID] = current_df
     return dict_of_stations
-
+'''
 if __name__ == '__main__':
     df = load_dataframe(['02712','00003'], '20140101', '20150101')
+'''

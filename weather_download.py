@@ -44,7 +44,8 @@ def zipfilestring_to_stationID(fullzipstring, era):
     ------
     fullzipstring : string - a correct input should look like 
                         "<ftp_path>/<string_containing_id>.zip"
-    
+    era: string specifying the path to return, either 'recent' 
+            or 'historical'
     OUTPUT
     ------
     station_ID : Station ID of type string as 5 digit number
@@ -145,7 +146,7 @@ def get_all_zipfile_names(path):
     return zipfile_names
     
     
-def set_city_files():
+def set_city_files(download_path):
     
     """
     Download file with the city names and station IDs from the FTP server and 
@@ -153,7 +154,7 @@ def set_city_files():
     
     INPUT
     ------
-    no input.
+    download_path: folder path you where you want to save the data.	
     
     OUTPUT
     ------
@@ -161,9 +162,11 @@ def set_city_files():
     
     """
     #Loading the city names' file
-    fname = 'downloaded_data/DWD_City_List.txt'
+    fname = os.path.join('downloaded_data','DWD_City_List.txt')
     
+    masterpath = download_path
     path_before = os.getcwd()
+    os.chdir(masterpath)
 
 
     if not os.path.isfile(fname):
@@ -187,6 +190,7 @@ def set_up_directories(download_path, era='all'):
     
     INPUT
     ------
+    download_path: folder path you where you want to save the data.
     era: string specifying the path to return, either 'recent', 'historical' or
             'all'
     OUTPUT
@@ -215,11 +219,11 @@ def set_up_directories(download_path, era='all'):
         
     elif era == 'historical':
         #Check if directory exists and delete it if so
-        if os.path.isdir('downloaded_data/'+era):
+        if os.path.isdir(os.path.join('downloaded_data',era)):
             import shutil
-            shutil.rmtree('downloaded_data/'+era)
+            shutil.rmtree(os.path.join('downloaded_data',era))
         #Create directories
-        if os.path.isdir('downloaded_data/'):
+        if os.path.isdir('downloaded_data'):
             os.chdir(string_1)
             os.mkdir(string_1a)
             os.chdir(masterpath)
@@ -231,11 +235,11 @@ def set_up_directories(download_path, era='all'):
 
     elif era == 'recent':
         #Check if directory exists and delete it if so
-        if os.path.isdir('downloaded_data/'+era):
+        if os.path.isdir(os.path.join('downloaded_data',era)):
             import shutil
-            shutil.rmtree('downloaded_data/'+era)
+            shutil.rmtree(os.path.join('downloaded_data',era))
         #Create directories
-        if os.path.isdir('downloaded_data/'):
+        if os.path.isdir('downloaded_data'):
             os.chdir(string_1)
             os.mkdir(string_1b)
             os.chdir(masterpath)
@@ -258,6 +262,7 @@ def download_data_as_txt_file(zipfilename, download_path):
     INPUT   
     -----    
     zipfilename : Name of the zip-file the text-file is contained as a string
+    download_path: folder path you where you want to save the data.
     
     OUTPUT
     ------
@@ -284,7 +289,8 @@ def download_data_as_txt_file(zipfilename, download_path):
     savename = get_txtfile_savename(zipfilename)
 
     masterpath = download_path
-    os.chdir(masterpath+'/downloaded_data/% s' % get_era_from_zipstring(zipfilename))
+    
+    os.chdir(os.path.join(masterpath,'downloaded_data',get_era_from_zipstring(zipfilename)))
     
     txtfile = myzip.open(txtfilename, "r")  
     
@@ -305,6 +311,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
     
     INPUT
     ------
+    download_path: folder path you where you want to save the data.
     era: string specifying the path to return, either 'recent', 'historical' or
             'all', default is 'all'
     
@@ -317,7 +324,7 @@ def download_weather_data(download_path,era = 'all', verbose = False):
         raise OSError('Download path is not valid!')
     
     set_up_directories(download_path, era = era)
-    set_city_files()
+    set_city_files(download_path)
     
     if era == 'all':
         
@@ -374,8 +381,11 @@ def download_weather_data(download_path,era = 'all', verbose = False):
 
 def print_readme():
     """Print README.txt"""
-    readme_file = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                                                '..', 'README.txt'))
+    
+    readme_file = 'README.txt'
+    
+    #os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)),
+    #                                           '..', 'README.txt'))
     with open(readme_file, 'r') as fp:
             print(fp.read())
 
@@ -394,11 +404,11 @@ if __name__ in '__main__':
     except getopt.GetoptError:
         print('Naaaaa.. i dont think so')
         print('print readme ...')
-#        print(('Because you obviously did not read README.txt, '
-#              'I will print it for you.'))
-#        print()
-#        print('------------README.txt------------')
-#        print_readme()
+        print(('Because you obviously did not read README.txt, '
+              'I will print it for you.'))
+        print()
+        print('------------README.txt------------')
+        print_readme()
         sys.exit(2)
 
     for opt, arg in opts:
@@ -409,8 +419,8 @@ if __name__ in '__main__':
         elif opt == '--folder':
             path = arg
         elif opt == '-h' or opt == '--help':
-            print('print readme.....')
-            #print_readme()
+            print('------------README.txt------------')
+            print_readme()
             sys.exit()
     
     if verbose:
