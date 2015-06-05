@@ -1,5 +1,11 @@
 import os
 import pandas as pd
+import warnings
+from operator import xor
+
+class MissingDataError(Exception):
+    pass
+
 
 
 def rename_columns(data_ger):
@@ -167,7 +173,7 @@ def get_timerange(df):
     list with the first and last dates of the data frame [time_from, time_to]"""
 
 
-    timerange = [df.iloc[0,1], df.iloc[-1,1]]
+    timerange = (df.iloc[0,1], df.iloc[-1,1])
     return(timerange)
 
 
@@ -272,6 +278,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     
     for string in Cities_or_IDs:
     #Getting the mapping dictionaries
+
         #print(string)
         
         #If Cities_or_IDs is the ID 
@@ -285,8 +292,8 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
             IDs.append(ID)
             
         else:
-            raise TypeError('You did not enter a correct ID or City. Call the function get_cities() \
-            to see the mapping dictionaries')
+            raise TypeError('You did not enter a correct ID or City. Call the'
+            'function get_cities() to see the mapping dictionaries')
     
 
     
@@ -295,34 +302,47 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     
     for ID in IDs:
         
-        current_df_rec = load_station(ID, 'recent')
-        current_df_hist = load_station(ID, 'historical')
+        current_dfs = {}
+        timerange = ['99999999', '00000000']
+
+        for era in ('recent','historical'):
         
-        current_df_rec = clean_dataframe(current_df_rec)
-        current_df_hist = clean_dataframe(current_df_hist)
-        
-        timerange_rec =  get_timerange(current_df_rec)
-        timerange_hist = get_timerange(current_df_hist)
-        
-        
-        if str(time_from) < timerange_hist[0] or str(time_to) > timerange_rec[1]:
-            raise ValueError('Dates are either too far in the past or the future, '
-            'the valid timerange is from %s to %s' %(timerange_hist[0],timerange_rec[1]))
+            try:
+                current_df = load_station(ID, era)
+                current_df = clean_dataframe(current_df)
+                (tmin, tmax) =  get_timerange(current_df)
+                timerange = [min(tmin, timerange[0]), max(tmax, timerange[1])]
+                current_dfs[era] = current_df
             
-        if str(time_from) > str(time_to):
-            raise ValueError('The time_from (%s) is later than the time_to (%s)!'\
-                                %(str(time_from), str(time_to)))
+            except MissingDataError:
+                print ('There is no',era,'data for station',ID)
+            
+            if not current_dfs:
+                raise MissingDataError('There is no data at all for station',ID)
+        
+        merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
+    
+        # overlap (kind of fine --> Warning)
+        if (xor(time_from < tmin, time_to > tmax)) or (time_from < tmin and time_to > tmax):
+            print(tmin,tmax)
+            print(timerange)
+            time_from = max(timerange[0], time_from)
+            time_to = min(timerange[1], time_to)
+            warnings.warn('Only the timerange from {timefrom} to {timeto} could'
+            ' be extracted!'.format(timefrom = time_from, timeto = time_to))
+            
+        # nothing's fine
+        elif (time_from < tmin and time_to < tmin) or (time_from > tmax and time_to > tmax):
+            raise MissingDataError('For the timerange you have chosen there is '
+            'no data available!')
+        
+        merged_df = extract_times(merged_df, time_from, time_to)
+    
+        merged_df['Date'] = pd.to_datetime(merged_df['Date'])
+        merged_df = merged_df.set_index('Date')
 
-        current_df = merge_eras(current_df_hist, current_df_rec)
-        current_df = extract_times(current_df, time_from, time_to)
-
-        #indices = pd.Timestamp(current_df.loc[''])
-        #date_form =  current_df.index.values.astype(str)
-
-        current_df['Date'] = pd.to_datetime(current_df['Date'])
-        current_df = current_df.set_index('Date')
-
-        dict_of_stations[ID] = current_df
+        dict_of_stations[ID] = merged_df    
+    
     return dict_of_stations
 '''
 if __name__ == '__main__':
