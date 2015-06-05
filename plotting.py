@@ -70,12 +70,19 @@ def finding_min(data_frame):
         #finding absolute minimum, it's first index
         minimum_idx_2=minimum_idces.loc[minimum_idx_1]
         #finding it's second index
-        return minimum, minimum_idx_1,minimum_idx_2
+        return minimum, minimum_idx_1, minimum_idx_2
     else: #if after averaging, the input is series
         return data_frame.min(),data_frame.idxmin()
 
 
-def get_statistics(time_series,resolution='month',function=finding_min,average=True):
+def get_statistics(time_series,resolution='month',function=finding_min, average=True):
+    '''
+    :param time_series: pandas time series indexed with days
+    :param resolution: 'month' or 'dayofyear' or 'year'
+    :param function: finding_min or finding_ax
+    :param average: Boolean
+    :return: function(time_series) according to resolution.
+    '''
     #function to find max/min averages/in total
     if average:
         new_frame=calculating_total_means(time_series,resolution)
@@ -89,14 +96,49 @@ def plot_means(time_series, resolution='month', number=1):
     #returns list of years, list of mean values for one row
     new_frame=calculating_yearly_means(time_series,resolution)
     if type(new_frame) == pd.core.frame.DataFrame:
-        ToPlot=new_frame.iloc[number] # to acess one row,
+        ToPlot = new_frame.iloc[number] # to acess one row,
     else:
-        ToPlot=new_frame #if we are dealing with years
-    plotting_indices=ToPlot.index.tolist()
+        ToPlot = new_frame #if we are dealing with years
+    plotting_indices = ToPlot.index.tolist()
     #get years
     return plotting_indices,ToPlot
 
+def plot_res(data_slice, resolution, startyear, endyear):
+    if resolution == 'month':
+        months = ["January", "February", "March", "April", "May", "June", "July"\
+                        , "August", "September", "October", "November", "December"]
+        month = input("Which month would you like to plot? Give a number 1-12: ")
+        month = int(month) - 1
+        plt.xlabel("Measures for each " + months[month])
+        plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
+        x, y = plot_means(data_slice, resolution, month)
+
+    elif resolution == 'dayofyear':
+        day = input("Which day of the year would you like to plot? Give a number 1-366: ")
+        day = int(day) - 1
+
+        plt.xlabel("Day #" + str(day) + " for each year")
+        plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
+
+        x, y = plot_means(data_slice, resolution, day)
+
+    elif resolution == 'year':
+        x, y = plot_means(data_slice, resolution, 0) #number doesn't matter
+
+    plt.plot(x,y, 'o')
+    plt.plot(x,y)
+    plt.ylabel("Requested Measure")
+
+    plt.show()
+
 def compare_statistics(time_series,resolution='dayofweek',slice1=[0,5],slice2=[5,7]):
+    '''
+    :param time_series: pandas time series indexed with days
+    :param resolution: 'month' or 'dayofyear' or 'year' (makes sence only with 'dayofyear')
+    :param slice1: list of dayofweek as int to compare
+    :param slice2: another list of dayofweek as int to compare
+    :return: the mean of the data frame for each slice
+    '''
     #comparing mean values in slice1 and slice2 with given resolution
     new_frame=calculating_total_means(time_series,resolution)
     #calculating total means
@@ -140,10 +182,11 @@ The codes for variables:
 16: Snow Height"""
 
 @click.command()
-@click.option('--id', type=click.STRING, help="Enter the ID of the station whose data you would like to receive")
-@click.option('--startyear', type=click.INT, default=1980, \
+@click.option('--id', type=click.STRING, default = '00131', \
+              help="Enter the ID of the station whose data you would like to receive")
+@click.option('--startyear', type=click.INT, default=2005, \
     help="Enter year that you want to begin your query as INT")
-@click.option("--endyear", type=click.INT, default=1981, \
+@click.option("--endyear", type=click.INT, default=2014, \
     help="Enter year that you want to begin your query as INT")
 @click.option("--measure", type=click.INT, default=3, help=helpstring)
 @click.option("--resolution", type=click.STRING, default="month", \
@@ -152,26 +195,61 @@ The codes for variables:
     help="Enter the function you want to use. 'min' or 'max'")
 @click.option("--average", type=click.BOOL, default=True, \
     help="Enter if you want the average of the given data")
+@click.option("--plotting", type=click.BOOL, default=False, \
+    help="Enter 'True' if you wayt to plot")
 
-def main(id, startyear, endyear, measure, resolution, function, average):
-
+def main(id, startyear, endyear, measure, resolution, function, average, plotting):
     start = str(startyear) + '0101'
     end = str(endyear) + '3112'
     if len(id[0]) == 1:
         id = [id]
 
     func_dict = {'min':finding_min, 'max':finding_max}
+    measures_dict = {4: 'DAMPFDRUCK', 3: 'Air Temperature', 5: 'BEDECKUNGSGRAD', 6: 'LUFTDRUCK_STATIONSHOEHE',\
+                     7: 'REL_FEUCHTE', 8:'WINDGESCHWINDIGKEIT', 9: 'Max Air Temperature', 10: 'Min Air Temperature', \
+                    11: 'LUFTTEMP_AM_ERDB_MINIMUM', 12: 'Max Wind Speed', 13: 'Precipitation Height', \
+                     14: 'IEDERSCHLAGSHOEHE_IND', 15: 'Sunshine Duration', 16: 'now Height'}
 
-    data_slice = get_data(id, measure, start, end)
+    data = load_dataframe(id, start, end)
+    for station in data:
+        selected = data[station].iloc[:, measure]
+    data_slice = pd.TimeSeries(selected)
 
     final_stats = get_statistics(data_slice, resolution, func_dict[function], average)
 
-    if resolution == 'dayofyear':
-        print(final_stats[0])
-        print((datetime.datetime(final_stats[1], 1, 1) + datetime.timedelta(int(final_stats[2]) - 1)).date())
-    else:
-        print(final_stats)
-    return final_stats
+    average_message = ' on average' if average else ''
+    value_message = 'the ' + function + ' for ' + measures_dict[measure] + ' is: ' + str(final_stats[0]) + average_message
 
+    print()
+    print(value_message)
+
+    index_message = 'for '
+
+    if resolution == 'dayofyear':
+        if not average:
+            print(index_message + str((datetime.datetime(final_stats[1], 1, 1) + \
+                                   datetime.timedelta(int(final_stats[2]) - 1)).date()))
+        else:
+            print(index_message + 'the ' + str(final_stats[1]) + 'th day of the year')
+    else:
+        if resolution == 'month':
+            month_name = datetime.date(1900, final_stats[2], 1).strftime('%B')
+            index_message += month_name + ' '
+        index_message += str(final_stats[1])
+        print(index_message)
+
+    comparison = compare_weather(data[id[0]])
+    print()
+    for i, measure in enumerate(['Air Temperature', 'Max Wind Speed',  'Precipitation Height', 'Sunshine Duration']):
+        message = 'on average the ' + measure + ' during the week is: ' + str(comparison[i][0]) \
+            + ' and during the weekend is: ' + str(comparison[i][1])
+        print(message)
+
+    print()
+    print('calculated from: ' + str(startyear) + ' to: ' + str(endyear))
+
+    if plotting:
+        print()
+        plot_res(data_slice, resolution, startyear, endyear)
 if __name__ == "__main__":
     main()
