@@ -323,9 +323,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
         merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
     
         # overlap (kind of fine --> Warning)
-        if (xor(time_from < timerange[0], time_to > timerange[1])) or (time_from < timerange[0] and time_to > timerange[1]):
-            print(tmin,tmax)
-            print(timerange)
+        if (xor(time_from > timerange[0], time_to > timerange[1])) or (xor(time_from < timerange[0], time_to < timerange[1])) or (time_from < timerange[0] and time_to > timerange[1]):
             time_from = max(timerange[0], time_from)
             time_to = min(timerange[1], time_to)
             warnings.warn('Only the timerange from {timefrom} to {timeto} could'
