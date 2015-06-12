@@ -241,10 +241,15 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
             print(index_message + calendar.day_name[final_stats[1]])
     else:
         if resolution == 'month':
-            month_name = datetime.date(1900, final_stats[2], 1).strftime('%B')
-            index_message += month_name + ' '
-        index_message += str(final_stats[1])
-        print(index_message)
+            if average:
+                month_name = datetime.date(1900, final_stats[1], 1).strftime('%B')
+                index_message += month_name + ' '
+                print(index_message)
+            else:
+                print(index_message + calendar.month_name[final_stats[2]] + ' ' + str(final_stats[1]))
+        else:
+            index_message += str(final_stats)
+            print(index_message)
 
     if weekend_comparison:
         comparison = compare_weather(data[id[0]])
