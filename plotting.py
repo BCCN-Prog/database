@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 import operator
 import click
 import datetime
+import calendar
 from weather_loading import load_dataframe
 
 from pylab import rcParams
@@ -190,13 +191,15 @@ The codes for variables:
     help="Enter year that you want to begin your query as INT")
 @click.option("--measure", type=click.INT, default=3, help=helpstring)
 @click.option("--resolution", type=click.STRING, default="month", \
-    help="Enter the time measure that you want. \n 'dayofyear', 'month' or 'year'")
+    help="Enter the time measure that you want. \n 'dayofyear', 'dayofweek', 'month' or 'year'")
 @click.option("--function", type=click.STRING, default="min", \
     help="Enter the function you want to use. 'min' or 'max'")
 @click.option("--average", type=click.BOOL, default=True, \
     help="Enter if you want the average of the given data")
 @click.option("--plotting", type=click.BOOL, default=False, \
-    help="Enter 'True' if you wayt to plot")
+    help="Enter 'True' if you want to plot")
+#@click.option("--weekend_comparison", type=click.BOOL, default=False, \
+ #   help="Enter 'True' if you want to compare between weekdays and weekend")
 
 def main(id, startyear, endyear, measure, resolution, function, average, plotting):
     start = str(startyear) + '0101'
@@ -231,6 +234,11 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
                                    datetime.timedelta(int(final_stats[2]) - 1)).date()))
         else:
             print(index_message + 'the ' + str(final_stats[1]) + 'th day of the year')
+    elif resolution == 'dayofweek':
+        if not average:
+            print(index_message + calendar.day_name[final_stats[2]] + 's during ' + str(final_stats[1]))
+        else:
+            print(index_message + calendar.day_name[final_stats[1]])
     else:
         if resolution == 'month':
             month_name = datetime.date(1900, final_stats[2], 1).strftime('%B')
