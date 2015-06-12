@@ -321,19 +321,25 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
                 raise MissingDataError('There is no data at all for station',ID)
         
         merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
+        #[time_from_av, time_to_av]  = np.clip([int(time_from), time_to],)
+    
     
         # overlap (kind of fine --> Warning)
-        if (xor(time_from > timerange[0], time_to > timerange[1])) or (xor(time_from < timerange[0], time_to < timerange[1])) or (time_from < timerange[0] and time_to > timerange[1]):
+        if (timerange[1] > time_from > timerange[0] and time_to > timerange[1])\
+           or (time_from < timerange[0] and timerange[0] < time_to < timerange[1])\
+           or (time_from < timerange[0] and time_to > timerange[1]):
+            
             time_from = max(timerange[0], time_from)
             time_to = min(timerange[1], time_to)
             warnings.warn('Only the timerange from {timefrom} to {timeto} could'
             ' be extracted!'.format(timefrom = time_from, timeto = time_to))
             
         # nothing's fine
-        elif (time_from < timerange[0] and time_to < timerange[0]) or (time_from > timerange[1] and time_to > timerange[1]):
+        elif (time_from < timerange[0] and time_to < timerange[0]) \
+             or (time_from > timerange[1] and time_to > timerange[1]):
             raise MissingDataError('For the timerange you have chosen there is '
             'no data available!')
-        
+    
         merged_df = extract_times(merged_df, time_from, time_to)
     
         merged_df['Date'] = pd.to_datetime(merged_df['Date'])
@@ -342,7 +348,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
         dict_of_stations[ID] = merged_df    
     
     return dict_of_stations
-'''
+"""
 if __name__ == '__main__':
-    df = load_dataframe(['02712','00003'], '20140101', '20150101')
-'''
+    df = load_dataframe(['02712','00044'], '19020101', '19030701')
+"""
