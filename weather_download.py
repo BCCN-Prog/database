@@ -30,7 +30,7 @@ def get_ftp_path(era):
     path: string specifying the webpath to the desired online data
     """
     
-    if era == 'historical':it 
+    if era == 'historical':
         return '/pub/CDC/observations_germany/climate/daily/kl/historical/'
     elif era == 'recent':
         return '/pub/CDC/observations_germany/climate/daily/kl/recent/'
