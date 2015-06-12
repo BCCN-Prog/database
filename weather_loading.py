@@ -317,10 +317,16 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
             except MissingDataError:
                 print ('There is no',era,'data for station',ID)
             
-            if not current_dfs:
-                raise MissingDataError('There is no data at all for station',ID)
+        if not current_dfs:
+            raise MissingDataError('There is no data at all for station',ID)
         
-        merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
+        if len(current_dfs) > 1:
+            merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
+        elif 'recent' in current_dfs.keys():
+            merged_df = current_dfs['recent']
+        elif 'historical' in current_dfs.keys():
+            merged_df = current_dfs['historical']
+            
         #[time_from_av, time_to_av]  = np.clip([int(time_from), time_to],)
     
     
@@ -348,7 +354,6 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
         dict_of_stations[ID] = merged_df    
     
     return dict_of_stations
-"""
+
 if __name__ == '__main__':
-    df = load_dataframe(['02712','00044'], '19020101', '19030701')
-"""
+    df = load_dataframe('00001', '1970', '2015')
