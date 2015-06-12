@@ -1,7 +1,6 @@
 import os
 import pandas as pd
 import warnings
-from operator import xor
 
 class MissingDataError(Exception):
     pass
@@ -379,6 +378,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
             print ('There is no data for station '+ID+' or the ID name is missspelled')
     
     return dict_of_stations
-
+'''
 if __name__ == '__main__':
     df = load_dataframe(['00001','00044'], '1970', '2015')
+'''
