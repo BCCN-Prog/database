@@ -249,7 +249,20 @@ def get_cities(filename = os.path.join('downloaded_data','DWD_City_List.txt')):
 
 
 
-def load_dataframe(Cities_or_IDs, time_from, time_to):
+def list_station_names():
+    stringlist, station_dict = get_cities()
+    return [station for station in station_dict]
+
+
+def check_multiple_stations(city):
+    city_list = list_station_names()
+    Boolean = [city in string for string in city_list]
+    idx = [k for k,v in enumerate(Boolean) if v == True]
+    similar_stations = [city_list[i] for i in idx]
+    
+    return similar_stations
+    
+def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False):
     
     """
     Loops through the list of station IDs and loads the historical and recent
@@ -259,38 +272,42 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     
     INPUT
     -----
-    IDs       :  list of station IDs (5 digit strings) or corresponding list of cities 
-    time_from :  lower bound of the timespan to be returned string format 'yyyymmdd'
-    time_to   :  upper bound of the timespan to be returned string format 'yyyymmdd'
+    Cities_or_IDs       :  list of station IDs (5 digit strings) or corresponding list of cities 
+    time_from           :  lower bound of the timespan to be returned string format 'yyyymmdd'
+    time_to             :  upper bound of the timespan to be returned string format 'yyyymmdd'
+    matching_stations   :  Boolean, False if you want a specific stations, True if you want a list
+                           of dataframes for matching cities (e.g. Berlin gives you Berlin-Tempelhof, 
+                           Berlin-Alexanderplatz, etc.)
     
     OUTPUT
     ------
     dictionary of time series
     
     """
+    #If a single city is entered, put it into a list
     if not isinstance( Cities_or_IDs, list):
         Cities_or_IDs = [Cities_or_IDs]
-        
-    
+         
     ID_to_citynames, citynames_to_ID = get_cities()
     #print(citynames_to_ID)
     IDs=[]
     
     for string in Cities_or_IDs:
     #Getting the mapping dictionaries
-
-        #print(string)
         
         #If Cities_or_IDs is the ID 
         if string.isdigit():
             IDs.append(string)
             
-        
         #If Cities_or_IDs is the the city name, mapping to the ID
         elif string.isalpha():
-            ID = citynames_to_ID[string]
-            IDs.append(ID)
-            
+            if matching_stations == False:
+                ID = citynames_to_ID[string]
+                IDs.append(ID)
+                
+            if matching_stations == True:
+                IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]
+                    
         else:
             raise TypeError('You did not enter a correct ID or City. Call the'
             'function get_cities() to see the mapping dictionaries')
@@ -301,58 +318,65 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     dict_of_stations = {}
     
     for ID in IDs:
-        
-        current_dfs = {}
-        
-        timerange = ['99999999', '00000000']
-
-        for era in ('recent','historical'):
-        
-            try:
-                current_df = load_station(ID, era)
-                current_df = clean_dataframe(current_df)
-                (tmin, tmax) =  get_timerange(current_df)
-                timerange = [min(tmin, timerange[0]), max(tmax, timerange[1])]
-                current_dfs[era] = current_df
+        try: 
+            current_dfs = {}
             
-            except MissingDataError:
-                print ('There is no '+era+' data for station '+ID)
-            
-        if not current_dfs:
-            raise MissingDataError('There is no data at all for station',ID)
-        
-        if len(current_dfs) > 1:
-            merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
-        elif 'recent' in current_dfs.keys():
-            merged_df = current_dfs['recent']
-        elif 'historical' in current_dfs.keys():
-            merged_df = current_dfs['historical']
-            
-        #[time_from_av, time_to_av]  = np.clip([int(time_from), time_to],)
+            timerange = ['99999999', '00000000']
     
-    
-        # overlap (kind of fine --> Warning)
-        if (timerange[1] > time_from > timerange[0] and time_to > timerange[1])\
-           or (time_from < timerange[0] and timerange[0] < time_to < timerange[1])\
-           or (time_from < timerange[0] and time_to > timerange[1]):
+            for era in ('recent','historical'):
             
-            time_from_new = max(timerange[0], time_from)
-            time_to_new = min(timerange[1], time_to)
-            warnings.warn('Station {ID}: Only the timerange from {timefrom} to {timeto} could'
-            ' be extracted!'.format(ID = ID, timefrom = time_from_new, timeto = time_to_new))
+                try:
+                    current_df = load_station(ID, era)
+                    current_df = clean_dataframe(current_df)
+                    (tmin, tmax) =  get_timerange(current_df)
+                    timerange = [min(tmin, timerange[0]), max(tmax, timerange[1])]
+                    current_dfs[era] = current_df
+                
+                except MissingDataError:
+                    print ('There is no '+era+' data for station '+ID)
+                
+            if not current_dfs:
+                raise MissingDataError('There is no data at all for station',ID)
             
-        # nothing's fine
-        elif (time_from < timerange[0] and time_to < timerange[0]) \
-             or (time_from > timerange[1] and time_to > timerange[1]):
-            raise MissingDataError('Station',ID,': For the timerange you have chosen there is '
-            'no data available!')
+            if len(current_dfs) > 1:
+                merged_df = merge_eras(current_dfs['historical'], current_dfs['recent'])
+            elif 'recent' in current_dfs.keys():
+                merged_df = current_dfs['recent']
+            elif 'historical' in current_dfs.keys():
+                merged_df = current_dfs['historical']
+                
+            #[time_from_av, time_to_av]  = np.clip([int(time_from), time_to],)
+        
+        
+            # overlap (kind of fine --> Warning)
+            if (timerange[1] > time_from > timerange[0] and time_to > timerange[1])\
+               or (time_from < timerange[0] and timerange[0] < time_to < timerange[1])\
+               or (time_from < timerange[0] and time_to > timerange[1]):
+                
+                time_from_new = max(timerange[0], time_from)
+                time_to_new = min(timerange[1], time_to)
+                warnings.warn('Station {ID}: Only the timerange from {timefrom} to {timeto} could'
+                ' be extracted!'.format(ID = ID, timefrom = time_from_new, timeto = time_to_new))
+                
+            # nothing's fine
+            elif (time_from < timerange[0] and time_to < timerange[0]) \
+                 or (time_from > timerange[1] and time_to > timerange[1]):
+                raise MissingDataError('Station',ID,': For the timerange you have chosen there is '
+                'no data available!')
+                
+            else:
+                time_from_new = time_from
+                time_to_new   = time_to
+                
+            merged_df = extract_times(merged_df, time_from_new, time_to_new)
+        
+            merged_df['Date'] = pd.to_datetime(merged_df['Date'])
+            merged_df = merged_df.set_index('Date')
     
-        merged_df = extract_times(merged_df, time_from_new, time_to_new)
-    
-        merged_df['Date'] = pd.to_datetime(merged_df['Date'])
-        merged_df = merged_df.set_index('Date')
-
-        dict_of_stations[ID] = merged_df    
+            dict_of_stations[ID] = merged_df 
+            
+        except MissingDataError:
+            print ('There is no data for station '+ID+' or the ID name is missspelled')
     
     return dict_of_stations
 
