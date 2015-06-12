@@ -12,6 +12,10 @@ from time import time
 import getopt
 import sys
 
+
+class OverwriteException(Exception):
+    pass
+
 def get_ftp_path(era):
     
     """
@@ -26,7 +30,7 @@ def get_ftp_path(era):
     path: string specifying the webpath to the desired online data
     """
     
-    if era == 'historical':
+    if era == 'historical':it 
         return '/pub/CDC/observations_germany/climate/daily/kl/historical/'
     elif era == 'recent':
         return '/pub/CDC/observations_germany/climate/daily/kl/recent/'
@@ -182,7 +186,7 @@ def set_city_files(download_path):
 
 
 
-def set_up_directories(download_path, era='all'):
+def set_up_directories(download_path, force, era='all'):
     
     """
     Delete old directories in the selected folder of the specified era(s) and 
@@ -191,6 +195,9 @@ def set_up_directories(download_path, era='all'):
     INPUT
     ------
     download_path: folder path you where you want to save the data.
+    
+    force: boolean variable. True if overwriting is expected
+
     era: string specifying the path to return, either 'recent', 'historical' or
             'all'
     OUTPUT
@@ -206,45 +213,53 @@ def set_up_directories(download_path, era='all'):
     os.chdir(masterpath)
     
     if era == 'all':
-        #Check if directory exists and delete it if so
-        if os.path.isdir('downloaded_data'):
-            import shutil
-            shutil.rmtree('downloaded_data')
-        #Create directories
-        os.mkdir(string_1)
-        os.chdir(string_1)
-        os.mkdir(string_1a)
-        os.mkdir(string_1b)
-        os.chdir(masterpath)
-        
-    elif era == 'historical':
-        #Check if directory exists and delete it if so
-        if os.path.isdir(os.path.join('downloaded_data',era)):
-            import shutil
-            shutil.rmtree(os.path.join('downloaded_data',era))
-        #Create directories
-        if os.path.isdir('downloaded_data'):
-            os.chdir(string_1)
-            os.mkdir(string_1a)
-            os.chdir(masterpath)
-        else:
-            os.mkdir(string_1)
-            os.chdir(string_1)
-            os.mkdir(string_1a)
-            os.chdir(masterpath)
+        if not force:
+            #Check if directory exists and raise error if so
+            if os.path.isdir(string_1):
+                raise OverwriteException("\n \n Some data was found in the system.\n If you would like to overwrite everything, add --force. Otherwise, specify era: 'historical' or 'recent'.")
 
-    elif era == 'recent':
-        #Check if directory exists and delete it if so
-        if os.path.isdir(os.path.join('downloaded_data',era)):
-            import shutil
-            shutil.rmtree(os.path.join('downloaded_data',era))
-        #Create directories
-        if os.path.isdir('downloaded_data'):
+        else:
+            #Check if directory exists and dleete directory if so
+            if os.path.isdir(string_1):
+                import shutil
+                shutil.rmtree(string_1)
+            #Create directories
             os.chdir(string_1)
+            os.mkdir(string_1a)
             os.mkdir(string_1b)
             os.chdir(masterpath)
+            
+    elif era == 'historical':
+        if not force:
+            #Check if directory exists and raise error if so
+            if os.path.isdir(os.path.join(string_1,string_1a)):
+                raise OverwriteException("\n \n Some historical data was found in the folder. \n If you would like to overwrite it, specify --force.")
+
         else:
-            os.mkdir(string_1)
+            if os.path.isdir(os.path.join(string_1,string_1a)):
+                import shutil
+                shutil.rmtree(os.path.join(string_1,string_1a))
+            #Create directories
+            if not os.path.isdir(os.path.join(string_1)): 
+                os.mkdir(string_1)
+                
+            os.chdir(string_1)
+            os.mkdir(string_1a)
+            os.chdir(masterpath)
+                
+    elif era == 'recent':
+        if not force:
+            #Check if directory exists and raise error if so
+            if os.path.isdir(os.path.join(string_1,string_1a)):
+                raise OverwriteException("\n \n Some recent data was found in the folder. \n If you would like to overwrite it, specify --force.")
+        else:
+            if os.path.isdir(os.path.join(string_1,string_1b)):
+                import shutil
+                shutil.rmtree(os.path.join(string_1,string_1b))
+            #Create directories
+            if not os.path.isdir(os.path.join(string_1)): 
+                os.mkdir(string_1)
+                
             os.chdir(string_1)
             os.mkdir(string_1b)
             os.chdir(masterpath)
@@ -262,6 +277,7 @@ def download_data_as_txt_file(zipfilename, download_path):
     INPUT   
     -----    
     zipfilename : Name of the zip-file the text-file is contained as a string
+    
     download_path: folder path you where you want to save the data.
     
     OUTPUT
@@ -303,7 +319,7 @@ def download_data_as_txt_file(zipfilename, download_path):
             
             
 
-def download_weather_data(download_path,era = 'all', verbose = False):
+def download_weather_data(download_path,era = 'all', force = False, verbose = False):
     
     """
     Downloads all the data for specified era to local directory by creating
@@ -312,8 +328,11 @@ def download_weather_data(download_path,era = 'all', verbose = False):
     INPUT
     ------
     download_path: folder path you where you want to save the data.
+    
     era: string specifying the path to return, either 'recent', 'historical' or
             'all', default is 'all'
+    
+    force: boolean variable. True if overwriting is expected.
     
     OUTPUT
     ------
@@ -323,9 +342,9 @@ def download_weather_data(download_path,era = 'all', verbose = False):
     if not os.path.isdir(download_path):
         raise OSError('Download path is not valid!')
     
-    set_up_directories(download_path, era = era)
+    set_up_directories(download_path, force, era = era)
     set_city_files(download_path)
-    
+        
     if era == 'all':
         
         for e in ['recent', 'historical']:
@@ -397,10 +416,11 @@ if __name__ in '__main__':
     path = os.getcwd()
     era = 'all'
     verbose = False
+    force = False
 
     try:
         opts, args = getopt.getopt(sys.argv[1:], 'h', ['era=', 'folder=', \
-                                                        'verbosity', 'help'])
+                                                        'verbosity','force','help'])
     except getopt.GetoptError:
         print('Naaaaa.. i dont think so')
         print('print readme ...')
@@ -414,6 +434,8 @@ if __name__ in '__main__':
     for opt, arg in opts:
         if opt == '--verbosity':
             verbose = True
+        elif opt == '--force':
+            force = True
         elif opt == '--era':
             era = arg
         elif opt == '--folder':
@@ -426,6 +448,6 @@ if __name__ in '__main__':
     if verbose:
         print('Downloading '+era+' data to '+path)
     
-    download_weather_data(path, era = era, verbose = verbose)
+    download_weather_data(path, era = era, verbose = verbose, force = force)
 
 
