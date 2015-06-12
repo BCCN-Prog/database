@@ -95,11 +95,11 @@ def check_for_weather_data(era):
             directory.' ")
             
     else:   
-        if not os.path.isdir('downloaded_data/'+era):
+        if not os.path.isdir(os.path.join('downloaded_data',era)):
             raise OSError('You dont have the '+era+' data, download it first.')
             
         else:
-            if os.listdir(os.getcwd()+'/downloaded_data/'+era) == []:
+            if os.listdir(os.path.join(os.getcwd(),'downloaded_data',era)) == []:
                 raise OSError('You dont have the '+era+' data, download it first.')
 
 
@@ -122,7 +122,7 @@ def check_for_station(ID, era):
 
     txtfilename = get_txtfilename(ID,era)
     
-    if txtfilename not in os.listdir(os.getcwd()+'/downloaded_data/'+era):
+    if txtfilename not in os.listdir(os.path.join(os.getcwd(),'downloaded_data',era)):
         raise ValueError('There is no station '+ID+' in the '+era+' data.')
 
 
@@ -154,7 +154,7 @@ def load_station(ID,era):
     
     txtfilename = get_txtfilename(ID,era)
     
-    df = pd.read_csv('downloaded_data/'+era+'/'+txtfilename)
+    df = pd.read_csv(os.path.join('downloaded_data',era,txtfilename))
     df = df.drop(df.columns[0], axis = 1)
     
     return df
@@ -205,7 +205,7 @@ def extract_times(df,  time_from, time_to):
     
     return df_from_to
     
-def get_cities(filename = 'downloaded_data/DWD_City_List.txt'):
+def get_cities(filename = os.path.join('downloaded_data','DWD_City_List.txt')):
     """
     Reads cities and ids from textfile 
     
