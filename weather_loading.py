@@ -303,6 +303,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     for ID in IDs:
         
         current_dfs = {}
+        
         timerange = ['99999999', '00000000']
 
         for era in ('recent','historical'):
@@ -315,7 +316,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
                 current_dfs[era] = current_df
             
             except MissingDataError:
-                print ('There is no',era,'data for station',ID)
+                print ('There is no '+era+' data for station '+ID)
             
         if not current_dfs:
             raise MissingDataError('There is no data at all for station',ID)
@@ -335,18 +336,18 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
            or (time_from < timerange[0] and timerange[0] < time_to < timerange[1])\
            or (time_from < timerange[0] and time_to > timerange[1]):
             
-            time_from = max(timerange[0], time_from)
-            time_to = min(timerange[1], time_to)
-            warnings.warn('Only the timerange from {timefrom} to {timeto} could'
-            ' be extracted!'.format(timefrom = time_from, timeto = time_to))
+            time_from_new = max(timerange[0], time_from)
+            time_to_new = min(timerange[1], time_to)
+            warnings.warn('Station {ID}: Only the timerange from {timefrom} to {timeto} could'
+            ' be extracted!'.format(ID = ID, timefrom = time_from_new, timeto = time_to_new))
             
         # nothing's fine
         elif (time_from < timerange[0] and time_to < timerange[0]) \
              or (time_from > timerange[1] and time_to > timerange[1]):
-            raise MissingDataError('For the timerange you have chosen there is '
+            raise MissingDataError('Station',ID,': For the timerange you have chosen there is '
             'no data available!')
     
-        merged_df = extract_times(merged_df, time_from, time_to)
+        merged_df = extract_times(merged_df, time_from_new, time_to_new)
     
         merged_df['Date'] = pd.to_datetime(merged_df['Date'])
         merged_df = merged_df.set_index('Date')
@@ -356,4 +357,4 @@ def load_dataframe(Cities_or_IDs, time_from, time_to):
     return dict_of_stations
 
 if __name__ == '__main__':
-    df = load_dataframe('00001', '1970', '2015')
+    df = load_dataframe(['00001','00044'], '1970', '2015')
