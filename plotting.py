@@ -198,10 +198,10 @@ The codes for variables:
     help="Enter if you want the average of the given data")
 @click.option("--plotting", type=click.BOOL, default=False, \
     help="Enter 'True' if you want to plot")
-#@click.option("--weekend_comparison", type=click.BOOL, default=False, \
- #   help="Enter 'True' if you want to compare between weekdays and weekend")
+@click.option("--weekend_comparison", type=click.BOOL, default=False, \
+    help="Enter 'True' if you want to compare between weekdays and weekend")
 
-def main(id, startyear, endyear, measure, resolution, function, average, plotting):
+def main(id, startyear, endyear, measure, resolution, function, average, plotting, weekend_comparison):
     start = str(startyear) + '0101'
     end = str(endyear) + '3112'
     if len(id[0]) == 1:
@@ -246,12 +246,13 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
         index_message += str(final_stats[1])
         print(index_message)
 
-    comparison = compare_weather(data[id[0]])
-    print()
-    for i, measure in enumerate(['Air Temperature', 'Max Wind Speed',  'Precipitation Height', 'Sunshine Duration']):
-        message = 'on average the ' + measure + ' during the week is: ' + str(comparison[i][0]) \
-            + ' and during the weekend is: ' + str(comparison[i][1])
-        print(message)
+    if weekend_comparison:
+        comparison = compare_weather(data[id[0]])
+        print()
+        for i, measure in enumerate(['Air Temperature', 'Max Wind Speed',  'Precipitation Height', 'Sunshine Duration']):
+            message = 'on average the ' + measure + ' during the week is: ' + str(comparison[i][0]) \
+                + ' and during the weekend is: ' + str(comparison[i][1])
+            print(message)
 
     print()
     print('calculated from: ' + str(startyear) + ' to: ' + str(endyear))
