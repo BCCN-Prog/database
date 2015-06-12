@@ -123,7 +123,7 @@ def check_for_station(ID, era):
     txtfilename = get_txtfilename(ID,era)
     
     if txtfilename not in os.listdir(os.path.join(os.getcwd(),'downloaded_data',era)):
-        raise ValueError('There is no station '+ID+' in the '+era+' data.')
+        raise MissingDataError('There is no station '+ID+' in the '+era+' data.')
 
 
 
