@@ -218,7 +218,7 @@ def get_cities(filename = os.path.join('downloaded_data','DWD_City_List.txt')):
     ------
     ID_to_citynames:  Dictionary that maps station IDs to citynames
     
-    citynames_to_ID: Dictionary that maps citynames to station IDs
+    citynfuzzames_to_ID: Dictionary that maps citynames to station IDs
     """
     
     # Attention! The textfile given by the DWD is encoded in Latin-1.
@@ -349,13 +349,30 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
             
         #If Cities_or_IDs is the the city name, mapping to the ID
         elif string.isalpha():
-            if matching_stations == False:
-                ID = citynames_to_ID[string]
-                IDs.append(ID)
-                
-            if matching_stations == True:
-                IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]
+            #Convert every city in the list to capitaized first letter
+            string = string.title()
+            #If a city was entered correctly it is in the dictionary
+            if string in citynames_to_ID:
+                if matching_stations == False:
+                    ID = citynames_to_ID[string]
+                    IDs.append(ID)
                     
+                if matching_stations == True:
+                    IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]
+            #If it is not in the dictionary try fuzzymatch to find a matching one
+            else:
+                string = fuzzymatch(string)
+                if string is None:
+                    raise TypeError('You did not enter a correct ID or City. Call the'
+                    'function get_cities() to see the mapping dictionaries')
+                else:
+                    if matching_stations == False:
+                        ID = citynames_to_ID[string]
+                        IDs.append(ID)
+                    
+                    if matching_stations == True:
+                        IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]  
+    
         else:
             raise TypeError('You did not enter a correct ID or City. Call the'
             'function get_cities() to see the mapping dictionaries')
