@@ -2,6 +2,7 @@ import os
 import pandas as pd
 import warnings
 import numpy as np
+import re
 
 class MissingDataError(Exception):
     pass
@@ -288,7 +289,7 @@ def fuzzymatch(typo_station):
     for station in stations_beginning:
         
         station = station.lower()+' '*(letters-len(station))
-        matching_fraction = sum( [list(typo_station)[i] == list(station)[i] \
+        matching_fraction = sum( [list(typo_station)[i].lower() == list(station)[i].lower() \
                                    for i in range(letters)]  ) / letters
                                        
                                        
@@ -339,7 +340,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
     ID_to_citynames, citynames_to_ID = get_cities()
     #print(citynames_to_ID)
     IDs=[]
-    
+
     for string in Cities_or_IDs:
     #Getting the mapping dictionaries
         
@@ -348,7 +349,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
             IDs.append(string)
             
         #If Cities_or_IDs is the the city name, mapping to the ID
-        elif string.isalpha():
+        elif re.sub(r'[?,$,.,!,-]',r'',string).isalpha():
             #Convert every city in the list to capitaized first letter
             string = string.title()
             #If a city was entered correctly it is in the dictionary
@@ -356,12 +357,14 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
                 if matching_stations == False:
                     ID = citynames_to_ID[string]
                     IDs.append(ID)
-                    
                 if matching_stations == True:
+
                     IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]
+                    
             #If it is not in the dictionary try fuzzymatch to find a matching one
             else:
                 string = fuzzymatch(string)
+                
                 if string is None:
                     raise TypeError('You did not enter a correct ID or City. Call the'
                     'function get_cities() to see the mapping dictionaries')
@@ -371,6 +374,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False)
                         IDs.append(ID)
                     
                     if matching_stations == True:
+                        string = string.split('-')[0]
                         IDs = IDs + [citynames_to_ID[city] for city in check_multiple_stations(string)]  
     
         else:
