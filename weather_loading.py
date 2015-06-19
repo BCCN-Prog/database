@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 import warnings
+import numpy as np
 
 class MissingDataError(Exception):
     pass
@@ -260,6 +261,54 @@ def check_multiple_stations(city):
     similar_stations = [city_list[i] for i in idx]
     
     return similar_stations
+    
+    
+    
+def fuzzymatch(typo_station):
+    
+    """
+    Returns the station-name that best matches the 'typo_station'. If there is
+    no station-name that is close enough it gives 'None'.
+    
+    INPUT
+    ------
+    typo_station:    required station-name that was not found in the station-list
+    
+    OUTPUT
+    ------
+    station-name that was most likely meant or None if nothing really matches.
+    """
+    
+    stations = list_station_names()
+    letters = len(typo_station)
+    stations_beginning = [name[:letters] for name in stations]
+    
+    accuracy = []
+    
+    for station in stations_beginning:
+        
+        station = station.lower()+' '*(letters-len(station))
+        matching_fraction = sum( [list(typo_station)[i] == list(station)[i] \
+                                   for i in range(letters)]  ) / letters
+                                       
+                                       
+        if sorted(list(typo_station)) == sorted(list(station)):            
+            anagram_score = 0.2
+        else:
+            anagram_score = 0.
+
+            
+        accuracy.append(matching_fraction+anagram_score)
+        
+    accuracy = np.array(accuracy)
+    accu_max = np.max(accuracy)
+    
+    if accu_max < 0.8:    
+        return None    
+    else:
+        return stations[np.argmax(accuracy)]  
+    
+    
     
 def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False):
     
