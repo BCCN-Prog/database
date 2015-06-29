@@ -217,13 +217,25 @@ def set_up_directories(download_path, force, era='all'):
             #Check if directory exists and raise error if so
             if os.path.isdir(string_1):
                 raise OverwriteException("\n \n Some data was found in the system.\n If you would like to overwrite everything, add --force. Otherwise, specify era: 'historical' or 'recent'.")
-
+            else:
+                #Check if directory exists and dleete directory if so
+                if os.path.isdir(string_1):
+                    import shutil
+                    shutil.rmtree(string_1)
+                #Create directories
+                os.mkdir(string_1)
+                os.chdir(string_1)
+                os.mkdir(string_1a)
+                os.mkdir(string_1b)
+                os.chdir(masterpath)
+                
         else:
             #Check if directory exists and dleete directory if so
             if os.path.isdir(string_1):
                 import shutil
                 shutil.rmtree(string_1)
             #Create directories
+            os.mkdir(string_1)            
             os.chdir(string_1)
             os.mkdir(string_1a)
             os.mkdir(string_1b)
@@ -234,7 +246,17 @@ def set_up_directories(download_path, force, era='all'):
             #Check if directory exists and raise error if so
             if os.path.isdir(os.path.join(string_1,string_1a)):
                 raise OverwriteException("\n \n Some historical data was found in the folder. \n If you would like to overwrite it, specify --force.")
-
+            else:
+                if os.path.isdir(os.path.join(string_1,string_1a)):
+                    import shutil
+                    shutil.rmtree(os.path.join(string_1,string_1a))
+                #Create directories
+                if not os.path.isdir(os.path.join(string_1)): 
+                    os.mkdir(string_1)
+                    
+                os.chdir(string_1)
+                os.mkdir(string_1a)
+                os.chdir(masterpath)
         else:
             if os.path.isdir(os.path.join(string_1,string_1a)):
                 import shutil
@@ -252,6 +274,17 @@ def set_up_directories(download_path, force, era='all'):
             #Check if directory exists and raise error if so
             if os.path.isdir(os.path.join(string_1,string_1a)):
                 raise OverwriteException("\n \n Some recent data was found in the folder. \n If you would like to overwrite it, specify --force.")
+            else:
+                if os.path.isdir(os.path.join(string_1,string_1b)):
+                    import shutil
+                    shutil.rmtree(os.path.join(string_1,string_1b))
+                #Create directories
+                if not os.path.isdir(os.path.join(string_1)): 
+                    os.mkdir(string_1)
+                    
+                os.chdir(string_1)
+                os.mkdir(string_1b)
+                os.chdir(masterpath)
         else:
             if os.path.isdir(os.path.join(string_1,string_1b)):
                 import shutil
