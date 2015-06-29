@@ -164,39 +164,38 @@ def compare_weather(time_series,resolution='dayofweek',slice1=[0,5],slice2=[5,7]
 
 helpstring = """Enter the code of measure(s) you want to obtain.
 The codes for variables:
-0: Numerical Index
-1: STATIONS_ID
-2: QUALITAETS_NIVEAU
-3: Air Temperature / LUFTTEMPERATUR
-4: DAMPFDRUCK
-5: BEDECKUNGSGRAD
-6: LUFTDRUCK_STATIONSHOEHE
-7: REL_FEUCHTE
-8: WINDGESCHWINDIGKEIT
-9: Max Air Temperature
-10: Min Air Temperature
-11: LUFTTEMP_AM_ERDB_MINIMUM (?)
-12: Max Wind Speed / WINDSPITZE_MAXIMUM
-13: Precipitation Height / NIEDERSCHLAGSHOEHE (?)
-14: NIEDERSCHLAGSHOEHE_IND (?)
-15: Sunshine Duration
-16: Snow Height"""
+0: STATIONS_ID
+1: QUALITAETS_NIVEAU
+2: Air Temperature / LUFTTEMPERATUR
+3: DAMPFDRUCK
+4: BEDECKUNGSGRAD
+5: LUFTDRUCK_STATIONSHOEHE
+6: REL_FEUCHTE
+7: WINDGESCHWINDIGKEIT
+8: Max Air Temperature
+9: Min Air Temperature
+10: LUFTTEMP_AM_ERDB_MINIMUM (?)
+11: Max Wind Speed / WINDSPITZE_MAXIMUM
+12: Precipitation Height / NIEDERSCHLAGSHOEHE (?)
+13: NIEDERSCHLAGSHOEHE_IND (?)
+14: Sunshine Duration
+15: Snow Height"""
 
 @click.command()
-@click.option('--id', type=click.STRING, default = '00131', \
+@click.option('--id', type=click.STRING, default = ['06337','00070'], \
               help="Enter the ID of the station whose data you would like to receive")
-@click.option('--startyear', type=click.INT, default=2005, \
+@click.option('--startyear', type=click.INT, default=1995, \
     help="Enter year that you want to begin your query as INT")
 @click.option("--endyear", type=click.INT, default=2014, \
     help="Enter year that you want to begin your query as INT")
-@click.option("--measure", type=click.INT, default=3, help=helpstring)
+@click.option("--measure", type=click.INT, default=2, help=helpstring)
 @click.option("--resolution", type=click.STRING, default="month", \
     help="Enter the time measure that you want. \n 'dayofyear', 'dayofweek', 'month' or 'year'")
 @click.option("--function", type=click.STRING, default="min", \
     help="Enter the function you want to use. 'min' or 'max'")
 @click.option("--average", type=click.BOOL, default=True, \
     help="Enter if you want the average of the given data")
-@click.option("--plotting", type=click.BOOL, default=False, \
+@click.option("--plotting", type=click.BOOL, default=True, \
     help="Enter 'True' if you want to plot")
 @click.option("--weekend_comparison", type=click.BOOL, default=False, \
     help="Enter 'True' if you want to compare between weekdays and weekend")
@@ -208,16 +207,19 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
         id = [id]
 
     func_dict = {'min':finding_min, 'max':finding_max}
-    measures_dict = {4: 'DAMPFDRUCK', 3: 'Air Temperature', 5: 'BEDECKUNGSGRAD', 6: 'LUFTDRUCK_STATIONSHOEHE',\
-                     7: 'REL_FEUCHTE', 8:'WINDGESCHWINDIGKEIT', 9: 'Max Air Temperature', 10: 'Min Air Temperature', \
-                    11: 'LUFTTEMP_AM_ERDB_MINIMUM', 12: 'Max Wind Speed', 13: 'Precipitation Height', \
-                     14: 'IEDERSCHLAGSHOEHE_IND', 15: 'Sunshine Duration', 16: 'now Height'}
+    measures_dict = {3: 'DAMPFDRUCK', 2: 'Air Temperature', 4: 'BEDECKUNGSGRAD', 5: 'LUFTDRUCK_STATIONSHOEHE',\
+                     6: 'REL_FEUCHTE', 7:'WINDGESCHWINDIGKEIT', 8: 'Max Air Temperature', 9: 'Min Air Temperature', \
+                    10: 'LUFTTEMP_AM_ERDB_MINIMUM', 11: 'Max Wind Speed', 12: 'Precipitation Height', \
+                     13: 'IEDERSCHLAGSHOEHE_IND', 14: 'Sunshine Duration', 15: 'now Height'}
 
     data = load_dataframe(id, start, end)
-    for station in data:
-        selected = data[station].iloc[:, measure]
-    data_slice = pd.TimeSeries(selected)
-
+       
+    data_slice=pd.concat([data[station].iloc[:, measure] for station in data],axis=1)
+    print(data_slice)
+    
+    data_slice=data_slice.mean(axis=1)
+    data_slice = pd.TimeSeries(data_slice)
+    
     final_stats = get_statistics(data_slice, resolution, func_dict[function], average)
 
     average_message = ' on average' if average else ''
