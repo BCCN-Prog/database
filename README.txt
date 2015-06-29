@@ -9,7 +9,7 @@ Arguments for the options (only single arguments possible):
 		 	excepts: 'historical','recent' or 'all' 
 			default: 'all' (both recent and historical)
 
---folder:        Specify the folder you where you want to save the data						
+--folder:        Specify the **already existing** directory where you want to save the data or use current directory. 						
 			excepts: String of the whole path of the directory
 			default: Current working directory
 
