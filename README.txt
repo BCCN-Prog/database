@@ -2,6 +2,10 @@ In your command window you have to go to the folder which contains weather_downl
 
 python weather_download.py --era=my_era --folder=my_folder
 
+WARNING: Not using the default folder might lead to problems when loading data. It is recommended not to specify any folder.
+Example:
+	python weather_download.py --era=my_era
+
 
 Arguments for the options (only single arguments possible):
 
@@ -9,7 +13,9 @@ Arguments for the options (only single arguments possible):
 		 	excepts: 'historical','recent' or 'all' 
 			default: 'all' (both recent and historical)
 
---folder:        Specify the **already existing** directory where you want to save the data or use current directory. 						
+--folder:        Specify the **already existing** directory where you want to save the data or use current directory. 				WARNING: Not using the default folder might lead to problems when loading 		
+			data
+						
 			excepts: String of the whole path of the directory
 			default: Current working directory
 
