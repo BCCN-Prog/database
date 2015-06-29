@@ -80,7 +80,7 @@ def get_statistics(time_series,resolution='month',function=finding_min, average=
     '''
     :param time_series: pandas time series indexed with days
     :param resolution: 'month' or 'dayofyear' or 'year'
-    :param function: finding_min or finding_ax
+    :param function: finding_min or finding_max
     :param average: Boolean
     :return: function(time_series) according to resolution.
     '''
