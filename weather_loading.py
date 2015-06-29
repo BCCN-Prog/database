@@ -450,7 +450,7 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, filepath = '', matching_st
             merged_df['Date'] = pd.to_datetime(merged_df['Date'])
             merged_df = merged_df.set_index('Date')
     
-            dict_of_stations[ID] = merged_df 
+            dict_of_stations[ID] = merged_df 2
             
         except MissingDataError:
             print ('There is no data for station '+ID+' or the ID name is missspelled')
