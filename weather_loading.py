@@ -311,7 +311,7 @@ def fuzzymatch(typo_station):
     
     
     
-def load_dataframe(Cities_or_IDs, time_from, time_to, filepath = '', matching_stations = False):
+def load_dataframe(Cities_or_IDs, time_from, time_to, matching_stations = False):
     
     """
     Loops through the list of station IDs and loads the historical and recent
@@ -324,8 +324,6 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, filepath = '', matching_st
     Cities_or_IDs       :  list of station IDs (5 digit strings) or corresponding list of cities 
     time_from           :  lower bound of the timespan to be returned string format 'yyyymmdd'
     time_to             :  upper bound of the timespan to be returned string format 'yyyymmdd'
-    filepath            :  If you're not in the database directory, specify the absolute path to it
-                           e.g. filepath = '/Users/example_users/Desktop/weather_project/database'
     matching_stations   :  Boolean, False if you want a specific stations, True if you want a list
                            of dataframes for matching cities (e.g. Berlin gives you Berlin-Tempelhof, 
                            Berlin-Alexanderplatz, etc.)
@@ -335,11 +333,6 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, filepath = '', matching_st
     dictionary of time series
     
     """
-    if not filepath:
-        curr_wd = os.getcwd()
-    else:
-        curr_wd = os.getcwd()
-        os.chdir(filepath)
     
     #If a single city is entered, put it into a list
     if not isinstance( Cities_or_IDs, list):
@@ -455,7 +448,6 @@ def load_dataframe(Cities_or_IDs, time_from, time_to, filepath = '', matching_st
         except MissingDataError:
             print ('There is no data for station '+ID+' or the ID name is missspelled')
         
-        os.chdir(curr_wd)
     
     return dict_of_stations
 '''
