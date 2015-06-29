@@ -11,17 +11,15 @@ df = pd.read_fwf(fname, colspecs=colspecs, header=0)#, index_col=0)
 df = df.drop(df.index[0])
 df = df.drop(df.index[-1])
 
-print(list(df)) #print keys
-#print(df)
-
+###Test fragment of code for plotting only for stations from s:
 s = [1,3,44,161,184,202,211,217,129,132,2,45,56,77,432,66,435,75,87,778]
 stations = [str(i) for i in s]
+df2 = df[df.Stations_id.isin(stations)]
 
-df2 = df.query("Stations_id in @stations")
-df3 = df[df.Stations_id.isin(stations)]
 
-#df = df3
-print(df3)
+###Here the subset of stations can be selected to be plotted
+#df = df2
+
 
 ###Getting gps positions
 y = df.as_matrix(columns=['geoBreite']).flatten()
@@ -44,21 +42,18 @@ ymax = max(Y); ymin = min(Y); yl = xmax-xmin
 dt = 0.01
 dx = dy = dt
 
-
 OX = np.arange(xmin-dx,xmax+2*dx,dx)
 OY = np.linspace(ymin-dy,ymax+2*dy,len(OX))
 XX,YY = np.meshgrid(OX,OY)
 
 ###Interpolation
-grid_z0 = griddata(coordinates, Temp, (XX, YY), method='linear')
+grid_z0 = griddata(coordinates, Temp, (XX, YY), method='nearest')
 
 
 ###Plotting
 plt.figure(figsize=(10,10))
-#plt.pcolormesh(XX,YY,grid_z0.T)
-
-plt.imshow(grid_z0.T,interpolation='quadric')
-#plt.plot(X,Y,'ko')
+plt.pcolormesh(XX,YY,grid_z0.T)
+plt.plot(X,Y,'ko')
 plt.colorbar()
 
 plt.show()
