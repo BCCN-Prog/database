@@ -141,7 +141,7 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     
     plt.plot(x,y, 'o')
     plt.plot(x,y)
-    plt.axhline(np.nanmean(y))
+    plt.axhline(np.nanmean(y), label = 'mean')
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
    
