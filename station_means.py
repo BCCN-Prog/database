@@ -5,6 +5,8 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
+import click
+import datetime
 
 
 def read_dwd_city_list(fname=os.path.join('downloaded_data', 'DWD_city_list.txt')):
@@ -94,7 +96,6 @@ def heatmap_germany(stations=None,
     grid_z0 = griddata(coordinates, df['Time avg.'].as_matrix().flatten(),
                        (XX, YY), method='nearest')
 
-
     ###Plotting
     plt.figure(figsize=(10,10))
     plt.pcolormesh(XX,YY,grid_z0.T)
@@ -104,5 +105,45 @@ def heatmap_germany(stations=None,
     plt.show()
 
 
-stations = [71, 161]
-heatmap_germany(stations)
+helpstring = """Enter the code of measure(s) you want to obtain.
+The codes for variables:
+0: station ID
+1: quality level
+2: air temperature
+3: vapor pressure
+4: degree of coverage
+5: air pressure
+6: relative humidity
+7: wind speed
+8: maximum air temperature
+9: minimum air temperature
+10: minimum groundlevel temperature
+11: maximum wind speed
+12: precipitation height
+13: precipitation ind (we don't really know what this is..)
+14: hours of sun
+15: depth of snow"""
+
+@click.command()
+@click.option('--station', type=click.INT, multiple=True,
+              help="Enter the ID of the station whose data you would like to receive")
+@click.option('--start_date', type=click.STRING, default='20150101',
+              help="Enter the start date of the average.")
+@click.option('--end_date', type=click.STRING, default='20150606',
+              help="Enter the end date of the average.")
+@click.option("--measure", type=click.INT, default=2, help=helpstring)
+@click.option('--station_list', type=click.STRING, default='downloaded_data/DWD_city_list.txt',
+              help='Enter the path to the DWD stations list file')
+
+def main(station, start_date, end_date, measure, station_list):
+
+    # empty tuple != None
+    if not station:
+        station = None
+
+    heatmap_germany(station, measure=measure,
+                    start_date=datetime.datetime.strptime(start_date, '%Y%m%d'),
+                    end_date=datetime.datetime.strptime(end_date, '%Y%m%d'), fname=station_list)
+
+if __name__ == "__main__":
+    main()
