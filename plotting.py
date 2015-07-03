@@ -129,6 +129,14 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
 
     plt.plot(x,y, 'o')
     plt.plot(x,y)
+    y_isfinite = np.isfinite(np.array(y))
+    y_regress  = np.array(y)[y_isfinite]
+    x_regress  = np.array(x)[y_isfinite]
+    # regression line
+    if (len(x) >= 10) and (len(y_regress)/len(x) >= 0.8):
+        slope, intercept, r_value, p_value, std_err = linregress(x_regress,y_regress)
+        plt.plot(np.array(x_regress), intercept+slope*np.array(x_regress), '--', label = 'regression line, slope = %.4f, p-value = %.4f' %(slope,p_value) )
+        plt.legend()
     plt.axhline(np.nanmean(y))
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
