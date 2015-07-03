@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 import operator
 import click
 import datetime
@@ -106,6 +107,7 @@ def plot_means(time_series, resolution='month', number=1):
 
 def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Measure"):
     
+    
     if resolution == 'month':
         months = ["January", "February", "March", "April", "May", "June", "July"\
                         , "August", "September", "October", "November", "December"]
@@ -127,6 +129,16 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     elif resolution == 'year':
         x, y = plot_means(data_slice, resolution, 0) #number doesn't matter
 
+    cols = plt.rcParams['axes.color_cycle']
+    
+    cred = '#E24A33'
+    cblue = '#348ABD'
+    cpurple = '#988ED5'
+    cgray = '#777777'
+    cyellow = '#FBC15E'
+    cgreen = '#8EBA42'
+    cpink = '#FFB5B8'
+    
     plt.plot(x,y, 'o')
     plt.plot(x,y)
     plt.xlabel("Year")
