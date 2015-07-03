@@ -48,16 +48,14 @@ def station_mean_measure(stations, measure=2,
 
 
 stations = [71, 161]
+###Getting values to plot
+#Temp = np.random.randint(0, 30, len(X))
+
+
 df = read_dwd_city_list()
 df2 = station_mean_measure(stations)
+
 print(df2)
-print(df.loc[df2.index, 'geoBreite'].as_matrix().flatten())
-print(df.loc[df2.index, 'geoLaenge'].as_matrix().flatten())
-
-
-###Getting gps positions
-#y = df.as_matrix(columns=['geoBreite']).flatten()
-#x = df.as_matrix(columns=['geoLaenge']).flatten()
 
 X = df.loc[df2.index, 'geoBreite'].as_matrix().flatten()
 Y = df.loc[df2.index, 'geoLaenge'].as_matrix().flatten()
@@ -66,30 +64,40 @@ Nstations = len(X)
 coordinates = np.array([X, Y]).T
 
 
-###Getting values to plot
-Temp = np.random.randint(0, 30, len(X))
+'''
+
+def plot_map(stations='All')
+
+	df = read_dwd_city_list()
+	df2 = station_mean_measure(stations)
 
 
-###Creating meshgrid to plot
-xmax = max(X); xmin = min(X); xl = xmax-xmin
-ymax = max(Y); ymin = min(Y); yl = xmax-xmin
-dt = 0.01
-dx = dy = dt
+	X = df.loc[df2.index, 'geoBreite'].as_matrix().flatten()
+	Y = df.loc[df2.index, 'geoLaenge'].as_matrix().flatten()
 
-OX = np.arange(xmin-dx,xmax+2*dx,dx)
-OY = np.linspace(ymin-dy,ymax+2*dy,len(OX))
-XX,YY = np.meshgrid(OX,OY)
+	Nstations = len(X)
+	coordinates = np.array([X, Y]).T
 
-###Interpolation
-grid_z0 = griddata(coordinates, Temp, (XX, YY), method='nearest')
+	###Creating meshgrid to plot
+	xmax = max(X); xmin = min(X); xl = xmax-xmin
+	ymax = max(Y); ymin = min(Y); yl = ymax-ymin
+	dt = 0.01
+	dx = dy = dt
 
+	OX = np.arange(xmin-dx,xmax+2*dx,dx)
+	OY = np.linspace(ymin-dy,ymax+2*dy,len(OX))
+	XX,YY = np.meshgrid(OX,OY)
 
-###Plotting
-plt.figure(figsize=(10,10))
-plt.pcolormesh(XX,YY,grid_z0.T)
-plt.plot(X,Y,'ko')
-plt.colorbar()
-
-plt.show()
+	###Interpolation
+	grid_z0 = griddata(coordinates, Temp, (XX, YY), method='nearest')
 
 
+	###Plotting
+	plt.figure(figsize=(10,10))
+	plt.pcolormesh(XX,YY,grid_z0.T)
+	plt.plot(X,Y,'ko')
+	plt.colorbar()
+
+	plt.show()
+
+'''
