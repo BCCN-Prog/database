@@ -68,15 +68,21 @@ def heatmap_germany(stations=None,
                               start_date=start_date,
                               end_date=end_date,
                               fname=fname)
+    
     df.dropna()
+    geo_df = read_dwd_city_list()
 
     X = df['geoBreite'].as_matrix().flatten()
     Y = df['geoLaenge'].as_matrix().flatten()
+    
+    geoX = geo_df['geoBreite'].as_matrix().flatten()
+    geoY = geo_df['geoLaenge'].as_matrix().flatten()
+    
     coordinates = np.array([X, Y]).T
 
     ###Creating meshgrid to plot
-    xmax = max(X); xmin = min(X)
-    ymax = max(Y); ymin = min(Y)
+    xmax = max(geoX); xmin = min(geoX)
+    ymax = max(geoY); ymin = min(geoY)
     dt = 0.01
     dx = dy = dt
 
