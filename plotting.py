@@ -129,15 +129,28 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
 
     plt.plot(x,y, 'o')
     plt.plot(x,y)
+    plt.axhline(np.nanmean(y))
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
-    yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
-    yrs[-1] = min(yrs[-1], endyear)
+   
     #print(yrs[-1])    
     #print(yrs[-1], endyear-1)    
-    print("years years", yrs)
-    plt.xticks(yrs, yrs.astype(str))
+    #print("years years", yrs)
+    yeardif = endyear - startyear
+    if yeardif < 10:
+        yrs = np.arange(startyear, endyear)
+        plt.xticks(yrs, yrs.astype(str))
+    elif yeardif < 50:          
+        yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
+        yrs[-1] = min(yrs[-1], endyear)
+        plt.xticks(yrs, yrs.astype(str))
+    else:
+        #yrs = np.arange(startyear, endyear+10, 10, dtype=int)    
+        yrs = np.linspace(startyear, endyear, 10, dtype=int)        
+        yrs[-1] = min(yrs[-1], endyear)
+        plt.xticks(yrs, yrs.astype(str))
     
+
     plt.ylabel(measure)
     plt.xlim(startyear, endyear)
 
@@ -195,7 +208,7 @@ The codes for variables:
 @click.command()
 @click.option('--id_stat', type=click.STRING, default = ['06337','00070'], \
               help="Enter the ID of the station whose data you would like to receive")
-@click.option('--startyear', type=click.INT, default=1995, \
+@click.option('--startyear', type=click.INT, default=1950, \
     help="Enter year that you want to begin your query as INT")
 @click.option("--endyear", type=click.INT, default=2014, \
     help="Enter year that you want to begin your query as INT")
