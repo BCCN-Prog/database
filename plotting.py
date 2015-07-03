@@ -157,7 +157,7 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     y_regress  = np.array(y)[y_isfinite]
     x_regress  = np.array(x)[y_isfinite]
     # regression line
-    if (len(x) >= 10) and (len(y_regress)/len(x) >= 0.8):
+    if (len(x_regress) >= 10) and (len(y_regress)/len(x) >= 0.8):
         slope, intercept, r_value, p_value, std_err = linregress(x_regress,y_regress)
         plt.plot(np.array(x_regress), intercept+slope*np.array(x_regress), '--',color = cgreen, label = 'regression line, slope = %.4f, p-value = %.4f' %(slope,p_value) )
         plt.legend(loc = 'best')
@@ -166,21 +166,20 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
    
-    #print(yrs[-1])    
-    #print(yrs[-1], endyear-1)    
-    #print("years years", yrs)
-    yeardif = endyear - startyear
+
+    yeardif = np.max(x) - np.min(x)
+    
     if yeardif < 10:
-        yrs = np.arange(startyear, endyear)
+        yrs = np.arange(np.min(x), np.max(x))
         plt.xticks(yrs, yrs.astype(str))
     elif yeardif < 50:          
-        yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
-        yrs[-1] = min(yrs[-1], endyear)
+        yrs = np.arange(np.min(x), np.max(x)+5, 5, dtype=int)    
+        yrs[-1] = min(yrs[-1], np.max(x))
         plt.xticks(yrs, yrs.astype(str))
     else:
         #yrs = np.arange(startyear, endyear+10, 10, dtype=int)    
-        yrs = np.linspace(startyear, endyear, 10, dtype=int)        
-        yrs[-1] = min(yrs[-1], endyear)
+        yrs = np.linspace(np.min(x), np.max(x), 10, dtype=int)        
+        yrs[-1] = min(yrs[-1], np.max(x))
         plt.xticks(yrs, yrs.astype(str))
     
 
