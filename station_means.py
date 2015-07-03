@@ -59,10 +59,10 @@ def station_mean_measure(stations=None, measure=2,
 
 
 def heatmap_germany(stations=None,
-             measure=2,
-             start_date=(datetime.datetime.now()-datetime.timedelta(datetime.datetime.now().weekday(), weeks=1)),
-             end_date=datetime.datetime.now(),
-             fname=os.path.join('downloaded_data', 'DWD_city_list.txt')):
+                    measure=2,
+                    start_date=(datetime.datetime.now()-datetime.timedelta(datetime.datetime.now().weekday(), weeks=1)),
+                    end_date=datetime.datetime.now(),
+                    fname=os.path.join('downloaded_data', 'DWD_city_list.txt')):
 
     df = station_mean_measure(stations, measure=measure,
                               start_date=start_date,
