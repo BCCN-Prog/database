@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+plt.style.use('ggplot')
 import operator
 import click
 import datetime
@@ -106,6 +107,7 @@ def plot_means(time_series, resolution='month', number=1):
 
 def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Measure"):
     
+    
     if resolution == 'month':
         months = ["January", "February", "March", "April", "May", "June", "July"\
                         , "August", "September", "October", "November", "December"]
@@ -127,17 +129,48 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     elif resolution == 'year':
         x, y = plot_means(data_slice, resolution, 0) #number doesn't matter
 
+    cols = plt.rcParams['axes.color_cycle']
+    
+    cred = '#E24A33'
+    cblue = '#348ABD'
+    cpurple = '#988ED5'
+    cgray = '#777777'
+    cyellow = '#FBC15E'
+    cgreen = '#8EBA42'
+    cpink = '#FFB5B8'
+    
     plt.plot(x,y, 'o')
     plt.plot(x,y)
+    y_isfinite = np.isfinite(np.array(y))
+    y_regress  = np.array(y)[y_isfinite]
+    x_regress  = np.array(x)[y_isfinite]
+    # regression line
+    if (len(x) >= 10) and (len(y_regress)/len(x) >= 0.8):
+        slope, intercept, r_value, p_value, std_err = linregress(x_regress,y_regress)
+        plt.plot(np.array(x_regress), intercept+slope*np.array(x_regress), '--', label = 'regression line, slope = %.4f, p-value = %.4f' %(slope,p_value) )
+        plt.legend()
+    plt.axhline(np.nanmean(y))
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
-    yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
-    yrs[-1] = min(yrs[-1], endyear)
+   
     #print(yrs[-1])    
     #print(yrs[-1], endyear-1)    
-    print("years years", yrs)
-    plt.xticks(yrs, yrs.astype(str))
+    #print("years years", yrs)
+    yeardif = endyear - startyear
+    if yeardif < 10:
+        yrs = np.arange(startyear, endyear)
+        plt.xticks(yrs, yrs.astype(str))
+    elif yeardif < 50:          
+        yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
+        yrs[-1] = min(yrs[-1], endyear)
+        plt.xticks(yrs, yrs.astype(str))
+    else:
+        #yrs = np.arange(startyear, endyear+10, 10, dtype=int)    
+        yrs = np.linspace(startyear, endyear, 10, dtype=int)        
+        yrs[-1] = min(yrs[-1], endyear)
+        plt.xticks(yrs, yrs.astype(str))
     
+
     plt.ylabel(measure)
     plt.xlim(startyear, endyear)
 
@@ -195,7 +228,7 @@ The codes for variables:
 @click.command()
 @click.option('--id_stat', type=click.STRING, default = ['06337','00070'], \
               help="Enter the ID of the station whose data you would like to receive")
-@click.option('--startyear', type=click.INT, default=1995, \
+@click.option('--startyear', type=click.INT, default=1950, \
     help="Enter year that you want to begin your query as INT")
 @click.option("--endyear", type=click.INT, default=2014, \
     help="Enter year that you want to begin your query as INT")

@@ -216,7 +216,7 @@ def set_up_directories(download_path, force, era='all'):
     if era == 'all':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(string_1) and not os.path.isdir('partially_downloaded'):
+            if os.path.isdir(string_1) and not os.path.exists('partially_downloaded'):
                     raise OverwriteException("\n \n Some data was found in the system.\n If you would like to overwrite everything, add --force. Otherwise, specify era: 'historical' or 'recent'.")
             else:
                 #Check if directory exists and dleete directory if so
@@ -245,7 +245,7 @@ def set_up_directories(download_path, force, era='all'):
     elif era == 'historical':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.isdir('partially_downloaded'):
+            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.exists('partially_downloaded'):
                 raise OverwriteException("\n \n Some historical data was found in the folder. \n If you would like to overwrite it, specify --force.")
             else:
                 if os.path.isdir(os.path.join(string_1,string_1a)):
@@ -273,7 +273,7 @@ def set_up_directories(download_path, force, era='all'):
     elif era == 'recent':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.isdir('partially_downloaded'):
+            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.exists('partially_downloaded'):
                 raise OverwriteException("\n \n Some recent data was found in the folder. \n If you would like to overwrite it, specify --force.")
             else:
                 if os.path.isdir(os.path.join(string_1,string_1b)):
