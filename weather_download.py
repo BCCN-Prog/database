@@ -11,6 +11,7 @@ import os
 from time import time
 import getopt
 import sys
+import numpy as np
 
 
 class OverwriteException(Exception):
@@ -215,8 +216,8 @@ def set_up_directories(download_path, force, era='all'):
     if era == 'all':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(string_1):
-                raise OverwriteException("\n \n Some data was found in the system.\n If you would like to overwrite everything, add --force. Otherwise, specify era: 'historical' or 'recent'.")
+            if os.path.isdir(string_1) and not os.path.isdir('partially_downloaded'):
+                    raise OverwriteException("\n \n Some data was found in the system.\n If you would like to overwrite everything, add --force. Otherwise, specify era: 'historical' or 'recent'.")
             else:
                 #Check if directory exists and dleete directory if so
                 if os.path.isdir(string_1):
@@ -230,7 +231,7 @@ def set_up_directories(download_path, force, era='all'):
                 os.chdir(masterpath)
                 
         else:
-            #Check if directory exists and dleete directory if so
+            #Check if directory exists and delete directory if so
             if os.path.isdir(string_1):
                 import shutil
                 shutil.rmtree(string_1)
@@ -244,7 +245,7 @@ def set_up_directories(download_path, force, era='all'):
     elif era == 'historical':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(os.path.join(string_1,string_1a)):
+            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.isdir('partially_downloaded'):
                 raise OverwriteException("\n \n Some historical data was found in the folder. \n If you would like to overwrite it, specify --force.")
             else:
                 if os.path.isdir(os.path.join(string_1,string_1a)):
@@ -272,7 +273,7 @@ def set_up_directories(download_path, force, era='all'):
     elif era == 'recent':
         if not force:
             #Check if directory exists and raise error if so
-            if os.path.isdir(os.path.join(string_1,string_1a)):
+            if os.path.isdir(os.path.join(string_1,string_1a))  and not os.path.isdir('partially_downloaded'):
                 raise OverwriteException("\n \n Some recent data was found in the folder. \n If you would like to overwrite it, specify --force.")
             else:
                 if os.path.isdir(os.path.join(string_1,string_1b)):
@@ -371,64 +372,63 @@ def download_weather_data(download_path,era = 'all', force = False, verbose = Fa
     ------
     not output
     """    
+
     
     if not os.path.isdir(download_path):
         raise OSError('Download path is not valid!')
     
+        
+    
     set_up_directories(download_path, force, era = era)
     set_city_files(download_path)
+    
+    full_partial_filename = os.path.join(download_path,'downloaded_data','partially_downloaded')
+    
+    if os.path.exists(full_partial_filename):
+        partially_downloaded = open(full_partial_filename,'r+')
+        partially_downloaded_id = int(partially_downloaded.read())
+        
+    else:
+        partially_downloaded = open(full_partial_filename,'w')  
+        partially_downloaded_id = 0
         
     if era == 'all':
-        
-        for e in ['recent', 'historical']:
-            
-            if verbose:
-                print('downloading '+e+' data..')
-                starttime = time()
-            
-            ftp_path = get_ftp_path(e)
-            
-            listfiles = get_all_zipfile_names(ftp_path)
-            
-            count = 0                 
-            for zipfilename in listfiles:
-                
-                if verbose:
-                    print(count+1,'/',len(listfiles))
-                    count +=1
-                
-                download_data_as_txt_file(zipfilename, download_path)
-                
-            if verbose:
-                total_time = time()-starttime
-                print('The download for the '+e+' data took %5.1f s'%total_time)
-                
-                   
-    elif era == 'historical' or era == 'recent':
-        
-            if verbose:
-                print('downloading '+era+' data..')
-                starttime = time()
-
-            ftp_path = get_ftp_path(era)
-            
-            listfiles = get_all_zipfile_names(ftp_path)
-            
-            count = 0
-            for zipfilename in listfiles:
-                
-                if verbose:
-                    print(count+1,'/',len(listfiles))
-                    count +=1
-                
-                download_data_as_txt_file(zipfilename, download_path)
-                
-            if verbose:
-                total_time = time()-starttime
-                print('The download for the '+era+' data took %5.1f s'%total_time)
-
+        eras = ['recent', 'historical']
+    elif era == 'recent' or era == 'historical':
+        eras = [era]
     else:
         raise ValueError("Era has to be either 'recent' or 'historical' or 'all'!")
+        
+    for e in eras:
+        
+        if verbose:
+            print('downloading '+e+' data..')
+            starttime = time()
+        
+        ftp_path = get_ftp_path(e)
+        
+        listfiles = get_all_zipfile_names(ftp_path)
+             
+        for zipfilename in listfiles[partially_downloaded_id:]:
+            
+            download_data_as_txt_file(zipfilename, download_path)            
+            
+            partially_downloaded_id +=1
+            if verbose:
+                print(partially_downloaded_id,'/',len(listfiles))
+            
+            partially_downloaded.write(str(partially_downloaded_id))
+            partially_downloaded.seek(0)
+            
+        if verbose:
+            total_time = time()-starttime
+            print('The download for the '+e+' data took %5.1f s'%total_time)
+            
+        
+        partially_downloaded.close()
+        os.remove(full_partial_filename)
+
+
 
 
 def print_readme():
