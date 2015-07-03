@@ -40,8 +40,8 @@ python weather_download.py --era='historical' --folder='\Users\my_name\Desktop' 
 
 In your command window you have to go to the folder which contains plotting2.py (Python 3 is required). Example usage of the file is the following:
 
-python plotting2.py --id Berlin --startyear 1990 --endyear 2014 --measure 12
-python plotting2.py --help
+python plotting.py --id Berlin --startyear 1990 --endyear 2014 --measure 12
+python plotting.py --help
 
 Parameters:
 
