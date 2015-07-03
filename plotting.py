@@ -133,17 +133,25 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     cols = plt.rcParams['axes.color_cycle']
     
     cred = '#E24A33'
-    cblue = '#348ABD'
+    cblue = '#83A1F2'#'#348ABD'
     cpurple = '#988ED5'
-    cgray = '#777777'
+    cgray = '#A8A8A9'#'#777777'
     cyellow = '#FBC15E'
-    cgreen = '#8EBA42'
-    cpink = '#FFB5B8'
+    cgreen = '#53C955'#'#8EBA42'
+    cpink = 'Salmon' #'#FFB5B8'
     
-    plt.plot(x,y, 'o')
-    plt.plot(x,y)
+    if measure.endswith('temperature'):
+        if np.nanmean(y) > 10:
+            use_color = cpink
+        else:
+            use_color = cblue
+        
+    
+    plt.axhline(np.nanmean(y),color = cgray, label = 'mean')    
 
-    plt.axhline(np.nanmean(y), label = 'mean')
+    plt.plot(x,y, 'o', color = use_color)
+    plt.plot(x,y, color = use_color)
+
 
     y_isfinite = np.isfinite(np.array(y))
     y_regress  = np.array(y)[y_isfinite]
@@ -151,9 +159,9 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     # regression line
     if (len(x) >= 10) and (len(y_regress)/len(x) >= 0.8):
         slope, intercept, r_value, p_value, std_err = linregress(x_regress,y_regress)
-        plt.plot(np.array(x_regress), intercept+slope*np.array(x_regress), '--', label = 'regression line, slope = %.4f, p-value = %.4f' %(slope,p_value) )
-        plt.legend()
-    plt.axhline(np.nanmean(y))
+        plt.plot(np.array(x_regress), intercept+slope*np.array(x_regress), '--',color = cgreen, label = 'regression line, slope = %.4f, p-value = %.4f' %(slope,p_value) )
+        plt.legend(loc = 'best')
+
 
     plt.xlabel("Year")
     #yrs = np.linspace(startyear, endyear, 5, dtype=int)
@@ -177,7 +185,7 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
     
 
     plt.ylabel(measure)
-    plt.xlim(startyear, endyear)
+    plt.xlim(np.min(x), np.max(x))
 
     plt.show()
 
