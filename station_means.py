@@ -71,7 +71,7 @@ def heatmap_germany(stations=None,
                               end_date=end_date,
                               fname=fname)
     
-    df.dropna()
+    df = df.dropna()
     geo_df = read_dwd_city_list()
 
     X = df['geoBreite'].as_matrix().flatten()
