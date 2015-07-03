@@ -59,24 +59,30 @@ def station_mean_measure(stations=None, measure=2,
 
 
 def heatmap_germany(stations=None,
-             measure=2,
-             start_date=(datetime.datetime.now()-datetime.timedelta(datetime.datetime.now().weekday(), weeks=1)),
-             end_date=datetime.datetime.now(),
-             fname=os.path.join('downloaded_data', 'DWD_city_list.txt')):
+                    measure=2,
+                    start_date=(datetime.datetime.now()-datetime.timedelta(datetime.datetime.now().weekday(), weeks=1)),
+                    end_date=datetime.datetime.now(),
+                    fname=os.path.join('downloaded_data', 'DWD_city_list.txt')):
 
     df = station_mean_measure(stations, measure=measure,
                               start_date=start_date,
                               end_date=end_date,
                               fname=fname)
+    
     df.dropna()
+    geo_df = read_dwd_city_list()
 
     X = df['geoBreite'].as_matrix().flatten()
     Y = df['geoLaenge'].as_matrix().flatten()
+    
+    geoX = geo_df['geoBreite'].as_matrix().flatten()
+    geoY = geo_df['geoLaenge'].as_matrix().flatten()
+    
     coordinates = np.array([X, Y]).T
 
     ###Creating meshgrid to plot
-    xmax = max(X); xmin = min(X)
-    ymax = max(Y); ymin = min(Y)
+    xmax = max(geoX); xmin = min(geoX)
+    ymax = max(geoY); ymin = min(geoY)
     dt = 0.01
     dx = dy = dt
 
