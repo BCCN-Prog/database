@@ -175,22 +175,22 @@ def compare_weather(time_series,resolution='dayofweek',slice1=[0,5],slice2=[5,7]
 
 helpstring = """Enter the code of measure(s) you want to obtain.
 The codes for variables:
-0: STATIONS_ID
-1: QUALITAETS_NIVEAU
-2: Air Temperature / LUFTTEMPERATUR
-3: DAMPFDRUCK
-4: BEDECKUNGSGRAD
-5: LUFTDRUCK_STATIONSHOEHE
-6: REL_FEUCHTE
-7: WINDGESCHWINDIGKEIT
-8: Max Air Temperature
-9: Min Air Temperature
-10: LUFTTEMP_AM_ERDB_MINIMUM (?)
-11: Max Wind Speed / WINDSPITZE_MAXIMUM
-12: Precipitation Height / NIEDERSCHLAGSHOEHE (?)
-13: NIEDERSCHLAGSHOEHE_IND (?)
-14: Sunshine Duration
-15: Snow Height"""
+0: station ID
+1: quality level
+2: air temperature
+3: vapor pressure
+4: degree of coverage
+5: air pressure
+6: relative humidity
+7: wind speed
+8: maximum air temperature
+9: minimum air temperature
+10: minimum groundlevel temperature
+11: maximum wind speed
+12: precipitation height
+13: precipitation ind (we don't really know what this is..)
+14: hours of sun
+15: depth of snow"""
 
 @click.command()
 @click.option('--id_stat', type=click.STRING, default = ['06337','00070'], \
