@@ -19,7 +19,7 @@ def calculating_yearly_means(time_series,resolution='month'):
             if resolution is 'year' returns and years as rows.
     '''
 
-    years = range(time_series.index.year[0], time_series.index.year[-1])
+    years = range(time_series.index.year[0], time_series.index.year[-1]+1)
     #years in period
     yearly_resolution_stats = [time_series.xs(str(year)).groupby\
         (lambda x : operator.attrgetter(resolution)(x)).mean() for year in years]
@@ -80,7 +80,7 @@ def get_statistics(time_series,resolution='month',function=finding_min, average=
     '''
     :param time_series: pandas time series indexed with days
     :param resolution: 'month' or 'dayofyear' or 'year'
-    :param function: finding_min or finding_max
+    :param function: finding_min or finding_ax
     :param average: Boolean
     :return: function(time_series) according to resolution.
     '''
@@ -104,14 +104,15 @@ def plot_means(time_series, resolution='month', number=1):
     #get years
     return plotting_indices,ToPlot
 
-def plot_res(data_slice, resolution, startyear, endyear):
+def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Measure"):
+    
     if resolution == 'month':
         months = ["January", "February", "March", "April", "May", "June", "July"\
                         , "August", "September", "October", "November", "December"]
         month = input("Which month would you like to plot? Give a number 1-12: ")
         month = int(month) - 1
         plt.xlabel("Measures for each " + months[month])
-        plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
+        #plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
         x, y = plot_means(data_slice, resolution, month)
 
     elif resolution == 'dayofyear':
@@ -119,7 +120,7 @@ def plot_res(data_slice, resolution, startyear, endyear):
         day = int(day) - 1
 
         plt.xlabel("Day #" + str(day) + " for each year")
-        plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
+        #plt.xticks(np.arange(startyear, endyear), np.arange(startyear, endyear).astype(str))
 
         x, y = plot_means(data_slice, resolution, day)
 
@@ -128,7 +129,17 @@ def plot_res(data_slice, resolution, startyear, endyear):
 
     plt.plot(x,y, 'o')
     plt.plot(x,y)
-    plt.ylabel("Requested Measure")
+    plt.xlabel("Year")
+    #yrs = np.linspace(startyear, endyear, 5, dtype=int)
+    yrs = np.arange(startyear, endyear+5, 5, dtype=int)    
+    yrs[-1] = min(yrs[-1], endyear)
+    #print(yrs[-1])    
+    #print(yrs[-1], endyear-1)    
+    print("years years", yrs)
+    plt.xticks(yrs, yrs.astype(str))
+    
+    plt.ylabel(measure)
+    plt.xlim(startyear, endyear)
 
     plt.show()
 
@@ -182,7 +193,7 @@ The codes for variables:
 15: Snow Height"""
 
 @click.command()
-@click.option('--id', type=click.STRING, default = ['06337','00070'], \
+@click.option('--id_stat', type=click.STRING, default = ['06337','00070'], \
               help="Enter the ID of the station whose data you would like to receive")
 @click.option('--startyear', type=click.INT, default=1995, \
     help="Enter year that you want to begin your query as INT")
@@ -200,11 +211,11 @@ The codes for variables:
 @click.option("--weekend_comparison", type=click.BOOL, default=False, \
     help="Enter 'True' if you want to compare between weekdays and weekend")
 
-def main(id, startyear, endyear, measure, resolution, function, average, plotting, weekend_comparison):
+def main(id_stat, startyear, endyear, measure, resolution, function, average, plotting, weekend_comparison):
     start = str(startyear) + '0101'
-    end = str(endyear) + '3112'
-    if len(id[0]) == 1:
-        id = [id]
+    end = str(endyear+1) + '0101'
+    #if len(id[0]) == 1:
+    #    id = [id]
 
     func_dict = {'min':finding_min, 'max':finding_max}
     measures_dict = {3: 'DAMPFDRUCK', 2: 'Air Temperature', 4: 'BEDECKUNGSGRAD', 5: 'LUFTDRUCK_STATIONSHOEHE',\
@@ -212,7 +223,7 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
                     10: 'LUFTTEMP_AM_ERDB_MINIMUM', 11: 'Max Wind Speed', 12: 'Precipitation Height', \
                      13: 'IEDERSCHLAGSHOEHE_IND', 14: 'Sunshine Duration', 15: 'now Height'}
 
-    data = load_dataframe(id, start, end)
+    data = load_dataframe(id_stat, start, end, matching_stations=True)
        
     data_slice=pd.concat([data[station].iloc[:, measure] for station in data],axis=1)
     print(data_slice)
@@ -266,6 +277,6 @@ def main(id, startyear, endyear, measure, resolution, function, average, plottin
 
     if plotting:
         print()
-        plot_res(data_slice, resolution, startyear, endyear)
+        plot_res(data_slice, resolution, startyear, endyear, measures_dict[measure])
 if __name__ == "__main__":
     main()
