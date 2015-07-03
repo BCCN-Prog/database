@@ -218,10 +218,10 @@ def main(id_stat, startyear, endyear, measure, resolution, function, average, pl
     #    id = [id]
 
     func_dict = {'min':finding_min, 'max':finding_max}
-    measures_dict = {3: 'DAMPFDRUCK', 2: 'Air Temperature', 4: 'BEDECKUNGSGRAD', 5: 'LUFTDRUCK_STATIONSHOEHE',\
-                     6: 'REL_FEUCHTE', 7:'WINDGESCHWINDIGKEIT', 8: 'Max Air Temperature', 9: 'Min Air Temperature', \
-                    10: 'LUFTTEMP_AM_ERDB_MINIMUM', 11: 'Max Wind Speed', 12: 'Precipitation Height', \
-                     13: 'IEDERSCHLAGSHOEHE_IND', 14: 'Sunshine Duration', 15: 'now Height'}
+    measures_dict = {3: 'vapor pressure', 2: 'air temperature', 4: 'degree of coverage', 5: 'air pressure',\
+                     6: 'relative humidity', 7:'wind speed', 8: 'maximum air temperature', 9: 'minimum air temperature', \
+                    10: 'minimum groundlevel temperature', 11: 'maximum wind speed', 12: 'precipitation height', \
+                     13: 'precipitation ind', 14: 'hours of sun', 15: 'depth of snow'}
 
     data = load_dataframe(id_stat, start, end, matching_stations=True)
        
