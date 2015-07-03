@@ -2,7 +2,7 @@
 
 In your command window you have to go to the folder which contains weather_download.py (Python 3 needs to be installed for that). The syntax to download data from the DWD on the command line:
 
-python weather_download.py --era=my_era --folder=my_folder
+python weather_download.py --era=my_era --folder=folder_path
 
 
 Arguments for the options (only single arguments possible):
@@ -11,7 +11,8 @@ Arguments for the options (only single arguments possible):
 		 	excepts: 'historical','recent' or 'all' 
 			default: 'all' (both recent and historical)
 
---folder:        Specify the folder you where you want to save the data						
+--folder:        Specify the path to the folder you where you want to save the data.
+		 A folder 'download_data' will be created in that path.						
 			excepts: String of the whole path of the directory
 			default: Current working directory
 
