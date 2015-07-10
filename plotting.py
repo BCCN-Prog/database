@@ -145,6 +145,9 @@ def plot_res(data_slice, resolution, startyear, endyear, measure = "Requested Me
             use_color = cpink
         else:
             use_color = cblue
+            
+    else:
+        use_color = cpurple
         
     
     plt.axhline(np.nanmean(y),color = cgray, label = 'mean')    
