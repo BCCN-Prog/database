@@ -271,7 +271,7 @@ def main(id_stat, startyear, endyear, measure, resolution, function, average, pl
     data = load_dataframe(id_stat, start, end, matching_stations=True)
        
     data_slice=pd.concat([data[station].iloc[:, measure] for station in data],axis=1)
-    print(data_slice)
+    #print(data_slice)
     
     data_slice=data_slice.mean(axis=1)
     data_slice = pd.TimeSeries(data_slice)
